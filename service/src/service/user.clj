@@ -32,7 +32,7 @@
         (assoc :session updated-session))))
 
 (defn user-logout-view [request]
-  (user-auth request nil nil))
+  (user-auth-view request nil nil))
 
 (defroutes user-routes
   (POST "/create" [username email password] (user-create-view username email password))
