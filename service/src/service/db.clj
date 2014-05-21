@@ -1,9 +1,8 @@
-(ns service.db)
-
 (ns service.db
   (:use carica.core
         korma.db
         korma.core))
+
 (defdb db {:classname "com.mysql.jdbc.Driver"
            :subprotocol "mysql"
            :user (config :db :user)

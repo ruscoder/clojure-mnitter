@@ -1,3 +1,10 @@
+(ns service.note
+  (:use [service.db :only [note user]]
+        [service.notifier :only [notify]]
+        service.utils
+        korma.core
+        [compojure.core :only [defroutes POST GET]]))
+
 (defn- sql-datetime-now []
   (clj-time.coerce/to-sql-time (clj-time.core/now)))
 
@@ -23,17 +30,17 @@
                                    :content content
                                    :date (sql-datetime-now)}))]
     (when note
-      (notifier/notify "create" user-id (:GENERATED_KEY note) content))))
+      (notify "create" user-id (:GENERATED_KEY note) content))))
 
 (defn- note-update [id content]
   (update note
     (set-fields {:content content})
     (where {:id id}))
-  (notifier/notify "update" nil id content))
+  (notify "update" nil id content))
 
 (defn- note-delete [id]
   (delete note (where {:id id}))
-  (notifier/notify "delete" nil id nil))
+  (notify "delete" nil id nil))
 
 (defn note-create-view [request content]
   (let [user-id (get-session-by-name request :user)]

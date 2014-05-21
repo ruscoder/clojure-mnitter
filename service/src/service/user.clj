@@ -1,3 +1,10 @@
+(ns service.user
+  (:use [service.db :only [user]]
+        service.utils
+        korma.core
+        [compojure.core :only [defroutes POST GET]]
+        [digest :only [md5]]))
+
 (defn- user-find [username email]
    (first (select user (where (or (= :username username)
                                   (= :email email))))))
@@ -15,12 +22,10 @@
     (response nil)))
 
 (defn user-current-view [request]
-  (let [user-id (get-session-by-name request :user)
-        token (md5 (str (config :secret-key) user-id))]
+  (let [user-id (get-session-by-name request :user)]
     (if-not user-id
       (response nil 401)
-      (response {:token token
-                 :user-id user-id}))))
+      (response {:user-id user-id}))))
 
 (defn user-auth-view [request username password]
   (let [user-entry (user-get username password)
