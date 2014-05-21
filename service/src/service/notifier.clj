@@ -7,13 +7,15 @@
 (def spec-server1 (car/make-conn-spec))
 (defmacro wcar* [& body] `(car/with-conn pool spec-server1 ~@body))
 
+(defn- create-listener [channel]
+  (car/with-new-pubsub-listener
+    spec-server1 {(config :channel) (fn [data]
+                                      (send! channel (pr-str data)))}
+     (car/subscribe (config :channel))))
+
 (defn api-handler [request]
   (with-channel request channel
-    (def listener
-      (car/with-new-pubsub-listener
-       spec-server1 {(config :channel) (fn [data]
-                                          (send! channel (pr-str data)))}
-       (car/subscribe (config :channel))))
+    (def listener (create-listener channel))
     (on-close channel (fn [status]
                         (car/close-listener listener)))))
 
