@@ -2,7 +2,9 @@
   (:require [compojure.route :as route]
             [clojure.java.io :as io]
             [clj-time.core]
-            [clj-time.coerce])
+            [clj-time.coerce]
+            [service.notifier :as notifier]
+            [org.httpkit.server :as kit])
   (:use compojure.core
         compojure.handler
         ring.middleware.edn
@@ -38,6 +40,7 @@
 
 (defroutes compojure-handler
   (GET "/" [] (slurp (io/resource "public/html/index.html")))
+  (GET "/rpc" [] notifier/api-handler)
   (context "/user" [] user-routes)
   (context "/note" [] note-routes)
   (route/resources "/")
@@ -48,3 +51,6 @@
   (-> compojure-handler
       site
       wrap-edn-params))
+
+(defn -main [& args]
+  (kit/run-server app {:port 8000}))
