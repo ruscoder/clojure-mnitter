@@ -17,9 +17,9 @@
       </div>
 
       <div class="row">
-        <div class="col-sm-8 blog-main"  id="content">
+        <div class="col-sm-8 blog-main" id="content">
 	  <div id="inner-content">
-	    
+
           <div class="blog-post">
             <h2 id="blog-post-title" class="blog-post-title">Another blog post</h2>
 	    <div id="blog-post-body">Blog post body</div><br/>
@@ -27,12 +27,12 @@
 	    <a href="#" id="article-edit" class="btn btn-info btn-xs">Edit</a>
 	    <a href="#" id="article-delete" class="btn btn-warning btn-xs">Delete</a>
           </div><!-- /.blog-post -->
-	  
+
 	  </div>
 
 	  <br/>
 	  <a id="new-post" href="#" class="btn btn-primary" onclick="client.core.show_create()">New post</a>
-	  
+
           <!-- ul class="pager"-->
           <!-- li><a href="#">Previous</a></li-->
           <!-- li><a href="#">Next</a></li-->
@@ -40,36 +40,47 @@
 
         </div><!-- /.blog-main -->
 
+
+          <div class="sidebar-module sidebar-module-inset" id="login-form">
+              <h4>Authentication</h4>
+              <p>
+                  <input type="text" class="form-control" id="user-username" placeholder="Username">
+              </p>
+              <p>
+                  <input type="password" class="form-control" id="user-password" placeholder="Password">
+              </p>
+              <p>
+                  <a id="login-btn" href="#" class="btn btn-primary" onclick="client.core.user_login()">Login</a>
+                  <a class="pull-right btn" onclick="client.core.show_reg_form()">Create new account</a>
+              </p>
+          </div>
+
+          <div class="sidebar-module sidebar-module-inset" id="reg-form">
+              <h4>Registration</h4>
+              <p>
+                  <input type="text" class="form-control" id="user-username" placeholder="Username">
+              </p>
+              <p>
+                  <input type="email" class="form-control" id="user-email" placeholder="Email">
+              </p>
+              <p>
+                  <input type="password" class="form-control" id="user-password" placeholder="Password">
+              </p>
+              <p>
+                  <input type="password" class="form-control" id="user-password-retry" placeholder="Password retry">
+              </p>
+              <p>
+                  <a id="login-btn" href="#" class="btn btn-primary" onclick="client.core.user_reg()">Register</a>
+                  <a class="pull-right btn" onclick="client.core.show_login_form()">Back to Login</a>
+              </p>
+          </div>
+
+          <div id="userinfo-form">
+              <p>Hello, <span id="username"></span>! <a href="#" onclick="client.core.user_logout()">Logout</a> </p>
+          </div>
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar" id="sidebar">
-          <div class="sidebar-module sidebar-module-inset">
-            <h4>About</h4>
-            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
-          </div>
-          <div class="sidebar-module">
-            <h4>Archives</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">January 2014</a></li>
-              <li><a href="#">December 2013</a></li>
-              <li><a href="#">November 2013</a></li>
-              <li><a href="#">October 2013</a></li>
-              <li><a href="#">September 2013</a></li>
-              <li><a href="#">August 2013</a></li>
-              <li><a href="#">July 2013</a></li>
-              <li><a href="#">June 2013</a></li>
-              <li><a href="#">May 2013</a></li>
-              <li><a href="#">April 2013</a></li>
-              <li><a href="#">March 2013</a></li>
-              <li><a href="#">February 2013</a></li>
-            </ol>
-          </div>
-          <div class="sidebar-module">
-            <h4>Elsewhere</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">GitHub</a></li>
-              <li><a href="#">Twitter</a></li>
-              <li><a href="#">Facebook</a></li>
-            </ol>
-          </div>
+
+
         </div><!-- /.blog-sidebar -->
 
       </div><!-- /.row -->
@@ -94,4 +105,4 @@
 
     </div><!-- /.container -->
   </body>
-</html> 
+</html>
