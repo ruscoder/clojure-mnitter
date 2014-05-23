@@ -11,3 +11,6 @@
 (defn set-session-by-name [request name value]
   (let [session (:session request)]
     (merge session {name value})))
+
+(defn parse-int [int-str]
+  (Integer/parseInt int-str))

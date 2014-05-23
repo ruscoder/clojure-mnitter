@@ -9,33 +9,35 @@
   (clj-time.coerce/to-sql-time (clj-time.core/now)))
 
 (defn- note-get [id]
-  (first (select note (with user (fields :username)) (where {:id id}))))
+  (first (select note (with user
+                        (fields :username))
+                      (where {:id (parse-int id)}))))
 
 (defn- note-is-my? [request id]
   (let [user-id (get-session-by-name request :user)
         note (note-get id)]
     (and user-id (= (:user_id note) user-id))))
 
-(defn offset-limit [query off, lim]
-  (assoc query :limit (str (or off 0) "," (or lim 10))))
-
 (defn note-list-all-view [user-offset]
   (response (select note (with user (fields :username))
                                     (order :date :DESC)
-                                    (offset-limit user-offset 10))))
+                                    (offset user-offset)
+                                    (limit 10))))
 
 (defn note-list-for-user-view [username user-offset]
   (response (select note (with user (fields :username)
                                     (where {:username username}))
                                     (order :date :DESC)
-                                    (offset-limit user-offset 10))))
+                                    (offset user-offset)
+                                    (limit 10))))
 
 (defn- note-create [user-id content]
   (let [note (insert note (values {:user_id user-id
                                    :content content
                                    :date (sql-datetime-now)}))]
     (when note
-      (notify "create" (:GENERATED_KEY note)))))
+      (notify "create" (:id note))
+      note)))
 
 (defn- note-update [id content]
   (update note

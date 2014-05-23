@@ -10,5 +10,5 @@
         :source-paths ["src"]
         :compiler {
           :output-to "resources/js/main.js"
-          :optimizations :whitespace
+          :optimizations :simple
           :pretty-print true}}]})

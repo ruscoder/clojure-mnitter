@@ -9,6 +9,8 @@
                  [compojure "1.1.6"]
                  [clj-time "0.7.0"]
                  [sonian/carica "1.1.0" :exclusions [[cheshire]]]
+                 [org.clojure/java.jdbc "0.3.2"]
+                 [postgresql "9.1-901.jdbc4"]
                  [korma "0.3.1"]
                  [mysql/mysql-connector-java "5.1.30"]
                  [fogus/ring-edn "0.2.0"]
