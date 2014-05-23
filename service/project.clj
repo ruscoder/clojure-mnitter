@@ -17,5 +17,8 @@
                  [http-kit "2.1.18"]
                  [com.taoensso/carmine "2.6.0"]]
   :plugins [[lein-ring "0.6.3"]]
-  :main service.core
-  :ring {:handler service.core/app})
+  :main ^:skip-aot service.core
+  :ring {:handler service.core/app}
+  :min-lein-version "2.3.4"
+  :uberjar-name "mnitter-standalone.jar"
+  :profiles {:uberjar {:aot :all}})

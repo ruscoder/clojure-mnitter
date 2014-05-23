@@ -1,4 +1,6 @@
 (ns service.note
+  (:require clj-time.core
+            clj-time.coerce)
   (:use [service.db :only [note user]]
         [service.notifier :only [notify]]
         service.utils

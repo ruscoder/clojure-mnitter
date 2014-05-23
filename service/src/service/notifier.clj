@@ -4,7 +4,7 @@
   (:use org.httpkit.server))
 
 (def pool (car/make-conn-pool))
-(def spec-server1 (car/make-conn-spec))
+(def spec-server1 (car/make-conn-spec :uri (config :redis-uri)))
 (defmacro wcar* [& body] `(car/with-conn pool spec-server1 ~@body))
 
 (defn- create-listener [channel]
@@ -15,10 +15,9 @@
 
 (defn api-handler [request]
   (with-channel request channel
-    (def listener (create-listener channel))
-    (on-close channel (fn [status]
-                        (car/close-listener listener)))))
-
+    (let [listener (create-listener channel)]
+      (on-close channel (fn [status]
+                          (car/close-listener listener))))))
 
 (defn notify [mtype id]
   (wcar* (car/publish (config :channel)

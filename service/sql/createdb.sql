@@ -1,6 +1,6 @@
 create database mnitter;
 grant all on mnitter.* to testdb@localhost identified by 'mnitter';
-CREATE TABLE "mnitter"."user"
+CREATE TABLE "user"
 (
 id serial primary key,
 username varchar(50) not null,

@@ -26,5 +26,5 @@
       site
       wrap-edn-params))
 
-(defn -main [& args]
-  (kit/run-server app {:port 8000}))
+(defn -main [port]
+  (kit/run-server app {:port (Integer. port)}))
