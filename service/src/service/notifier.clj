@@ -20,9 +20,7 @@
                         (car/close-listener listener)))))
 
 
-(defn notify [mtype username id content]
+(defn notify [mtype id]
   (wcar* (car/publish (config :channel)
                       (pr-str {:mtype mtype
-                               :username username
-                               :id id
-                               :content content}))))
+                               :id id}))))

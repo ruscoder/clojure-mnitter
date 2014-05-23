@@ -10,99 +10,82 @@
   </head>
   <body>
     <div class="container">
-
-      <div class="blog-header">
-        <h1 class="blog-title">The Bootstrap Blog</h1>
-        <p class="lead blog-description">The official example template of creating a blog with Bootstrap.</p>
+      <div class="blog-header" id="header">
+          <h1 class="mnitter-title"><a href="/#">Mnitter</a></h1>
+        <p class="lead blog-description">Mini twitter. Application for clojurecourse.</p>
       </div>
-
       <div class="row">
         <div class="col-sm-8 blog-main" id="content">
-	  <div id="inner-content">
-
-          <div class="blog-post">
-            <h2 id="blog-post-title" class="blog-post-title">Another blog post</h2>
-	    <div id="blog-post-body">Blog post body</div><br/>
-	    <a href="#" id="article-view" class="btn btn-default btn-xs">View</a>
-	    <a href="#" id="article-edit" class="btn btn-info btn-xs">Edit</a>
-	    <a href="#" id="article-delete" class="btn btn-warning btn-xs">Delete</a>
-          </div><!-- /.blog-post -->
-
-	  </div>
-
-	  <br/>
-	  <a id="new-post" href="#" class="btn btn-primary" onclick="client.core.show_create()">New post</a>
-
-          <!-- ul class="pager"-->
-          <!-- li><a href="#">Previous</a></li-->
-          <!-- li><a href="#">Next</a></li-->
-          <!-- /ul-->
-
-        </div><!-- /.blog-main -->
-
-
-          <div class="sidebar-module sidebar-module-inset" id="login-form">
-              <h4>Authentication</h4>
-              <p>
-                  <input type="text" class="form-control" id="user-username" placeholder="Username">
-              </p>
-              <p>
-                  <input type="password" class="form-control" id="user-password" placeholder="Password">
-              </p>
-              <p>
-                  <a id="login-btn" href="#" class="btn btn-primary" onclick="client.core.user_login()">Login</a>
-                  <a class="pull-right btn" onclick="client.core.show_reg_form()">Create new account</a>
-              </p>
+          <div id="note-form-container"></div> <br/>
+          <div id="inner-content">
+            <div id="note-post">
+              <div id="note-post-body">
+                <a id="username-link"><b id="username">@ruscoder</b></a> <span id="date">12.12.2014 11:55</span>
+                <span class="pull-right" id="controls">
+                <a id="note-edit" class="btn btn-info btn-xs">Edit</a>
+                <a id="note-delete" class="btn btn-warning btn-xs">Delete</a>
+                </span>
+              </div>
+              <div id="content">content content content content content content content content content content </div>
+              <br />
+            </div>
           </div>
-
-          <div class="sidebar-module sidebar-module-inset" id="reg-form">
-              <h4>Registration</h4>
-              <p>
-                  <input type="text" class="form-control" id="user-username" placeholder="Username">
-              </p>
-              <p>
-                  <input type="email" class="form-control" id="user-email" placeholder="Email">
-              </p>
-              <p>
-                  <input type="password" class="form-control" id="user-password" placeholder="Password">
-              </p>
-              <p>
-                  <input type="password" class="form-control" id="user-password-retry" placeholder="Password retry">
-              </p>
-              <p>
-                  <a id="login-btn" href="#" class="btn btn-primary" onclick="client.core.user_reg()">Register</a>
-                  <a class="pull-right btn" onclick="client.core.show_login_form()">Back to Login</a>
-              </p>
+          <div>
+            <a onclick="client.core.load_more_notes();">Show more</a>
           </div>
-
-          <div id="userinfo-form">
-              <p>Hello, <span id="username"></span>! <a href="#" onclick="client.core.user_logout()">Logout</a> </p>
-          </div>
+        </div> <!-- content -->
+        <!-- /.blog-main -->
+        <div class="sidebar-module sidebar-module-inset" id="login-form">
+          <h4>Authentication</h4>
+          <p>
+            <input type="text" class="form-control" id="user-username" placeholder="Username">
+          </p>
+          <p>
+            <input type="password" class="form-control" id="user-password" placeholder="Password">
+          </p>
+          <p>
+              <a id="login-btn" class="btn btn-primary" onclick="client.core.user_login()">Login</a>
+            <a class="pull-right btn" onclick="client.core.show_reg_form()">Create new account</a>
+          </p>
+        </div>
+        <div class="sidebar-module sidebar-module-inset" id="reg-form">
+          <h4>Registration</h4>
+          <p>
+            <input type="text" class="form-control" id="user-username" placeholder="Username">
+          </p>
+          <p>
+            <input type="email" class="form-control" id="user-email" placeholder="Email">
+          </p>
+          <p>
+            <input type="password" class="form-control" id="user-password" placeholder="Password">
+          </p>
+          <p>
+            <input type="password" class="form-control" id="user-password-retry" placeholder="Password retry">
+          </p>
+          <p>
+            <a id="login-btn" class="btn btn-primary" onclick="client.core.user_reg()">Register</a>
+            <a class="pull-right btn" onclick="client.core.show_login_form()">Back to Login</a>
+          </p>
+        </div>
+        <div id="userinfo-form">
+            <p>Hello, <span id="username"></span>! <a onclick="client.core.user_logout()">Logout</a> </p>
+        </div>
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar" id="sidebar">
-
-
-        </div><!-- /.blog-sidebar -->
-
-      </div><!-- /.row -->
-
-      <div class="row">
-	<div id="article-form">
-	  Title:<br/>
-	  <input id="article-title" type="text"/ class="form-control"><br/>
-	  Text:<br/>
-	  <textarea id="article-body" class="form-control"></textarea><br/>
-	  <a id="save-btn" href="#" class="btn btn-primary" onclick="client.core.try_create_article()">Save</a>
-	  <a href="#" class="btn btn-default" onclick="client.core.close_form()">Cancel</a>
-	</div>
-
-	<div id="view-article">
-	  <h2 id="view-title"></h2>
-	  <span id="view-body"></span>
-	  <br/><br/>
-	  <a href="#" class="btn btn-default" onclick="client.core.close_form()">Close</a>
-	</div>
+        </div>
+        <!-- /.blog-sidebar -->
       </div>
-
-    </div><!-- /.container -->
+      <!-- /.row -->
+      <div class="row">
+        <div id="note-form">
+          <textarea id="note-content" class="form-control"></textarea><br/>
+          <a id="save-btn" class="btn btn-primary" onclick="client.core.try_create_note()">Save</a>
+          <a id="cancel-btn" class="btn btn-default" onclick="client.core.close_form()">Cancel</a>
+        </div>
+        <div id="note-add-button">
+          <a id="new-post" class="btn btn-primary" onclick="client.core.show_create_note_form()">New note</a>
+        </div>
+      </div>
+    </div>
+    <!-- /.container -->
   </body>
 </html>

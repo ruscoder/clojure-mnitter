@@ -9,38 +9,43 @@
   (clj-time.coerce/to-sql-time (clj-time.core/now)))
 
 (defn- note-get [id]
-  (first (select note (where {:id id}))))
+  (first (select note (with user (fields :username)) (where {:id id}))))
 
 (defn- note-is-my? [request id]
   (let [user-id (get-session-by-name request :user)
         note (note-get id)]
     (and user-id (= (:user_id note) user-id))))
 
-(defn note-list-all-view []
-  (response (select note (with user (fields :username))
-                                    (order :date :DESC))))
+(defn offset-limit [query off, lim]
+  (assoc query :limit (str (or off 0) "," (or lim 10))))
 
-(defn note-list-for-user-view [username]
+(defn note-list-all-view [user-offset]
+  (response (select note (with user (fields :username))
+                                    (order :date :DESC)
+                                    (offset-limit user-offset 10))))
+
+(defn note-list-for-user-view [username user-offset]
   (response (select note (with user (fields :username)
                                     (where {:username username}))
-                                    (order :date :DESC))))
+                                    (order :date :DESC)
+                                    (offset-limit user-offset 10))))
 
 (defn- note-create [user-id content]
   (let [note (insert note (values {:user_id user-id
                                    :content content
                                    :date (sql-datetime-now)}))]
     (when note
-      (notify "create" user-id (:GENERATED_KEY note) content))))
+      (notify "create" (:GENERATED_KEY note)))))
 
 (defn- note-update [id content]
   (update note
     (set-fields {:content content})
     (where {:id id}))
-  (notify "update" nil id content))
+  (notify "update" id))
 
 (defn- note-delete [id]
   (delete note (where {:id id}))
-  (notify "delete" nil id nil))
+  (notify "delete" id))
 
 (defn note-create-view [request content]
   (let [user-id (get-session-by-name request :user)]
@@ -58,9 +63,13 @@
       (response nil 403)
       (response (note-delete id))))
 
+(defn note-one-view [id]
+  (response (note-get id)))
+
 (defroutes note-routes
   (POST "/delete/:id" [id :as req] (note-delete-view req id))
   (POST "/update/:id" [id content :as req] (note-update-view req id content))
-  (GET "/list-all" [] (note-list-all-view))
-  (GET "/list-user" [username] (note-list-for-user-view username))
-  (POST "/create" [content :as req] (note-create-view req content)))
+  (GET "/list-all" {{offset :offset} :params} (note-list-all-view offset))
+  (GET "/list-user/:username" [username :as {{offset :offset} :params}] (note-list-for-user-view username offset))
+  (POST "/create" [content :as req] (note-create-view req content))
+  (GET "/:id" [id] (note-one-view id)))
