@@ -42,11 +42,11 @@
 (defn- note-update [id content]
   (update note
     (set-fields {:content content})
-    (where {:id id}))
+    (where {:id (parse-int id)}))
   (notify "update" id))
 
 (defn- note-delete [id]
-  (delete note (where {:id id}))
+  (delete note (where {:id (parse-int id)}))
   (notify "delete" id))
 
 (defn note-create-view [request content]
