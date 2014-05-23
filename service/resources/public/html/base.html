@@ -31,7 +31,7 @@
             </div>
           </div>
           <div>
-            <a onclick="client.core.load_more_notes();">Show more</a>
+            <a onclick="client.note.load_more_notes();">Show more</a>
           </div>
         </div> <!-- content -->
         <!-- /.blog-main -->
@@ -44,8 +44,8 @@
             <input type="password" class="form-control" id="user-password" placeholder="Password">
           </p>
           <p>
-              <a id="login-btn" class="btn btn-primary" onclick="client.core.user_login()">Login</a>
-            <a class="pull-right btn" onclick="client.core.show_reg_form()">Create new account</a>
+              <a id="login-btn" class="btn btn-primary" onclick="client.user.user_login()">Login</a>
+            <a class="pull-right btn" onclick="client.user.show_reg_form()">Create new account</a>
           </p>
         </div>
         <div class="sidebar-module sidebar-module-inset" id="reg-form">
@@ -63,12 +63,12 @@
             <input type="password" class="form-control" id="user-password-retry" placeholder="Password retry">
           </p>
           <p>
-            <a id="login-btn" class="btn btn-primary" onclick="client.core.user_reg()">Register</a>
-            <a class="pull-right btn" onclick="client.core.show_login_form()">Back to Login</a>
+            <a id="login-btn" class="btn btn-primary" onclick="client.user.user_reg()">Register</a>
+            <a class="pull-right btn" onclick="client.user.show_login_form()">Back to Login</a>
           </p>
         </div>
         <div id="userinfo-form">
-            <p>Hello, <span id="username"></span>! <a onclick="client.core.user_logout()">Logout</a> </p>
+            <p>Hello, <span id="username"></span>! <a onclick="client.user.user_logout()">Logout</a> </p>
         </div>
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar" id="sidebar">
         </div>
@@ -78,11 +78,11 @@
       <div class="row">
         <div id="note-form">
           <textarea id="note-content" class="form-control"></textarea><br/>
-          <a id="save-btn" class="btn btn-primary" onclick="client.core.try_create_note()">Save</a>
-          <a id="cancel-btn" class="btn btn-default" onclick="client.core.close_form()">Cancel</a>
+          <a id="save-btn" class="btn btn-primary" onclick="client.note.try_create_note()">Save</a>
+          <a id="cancel-btn" class="btn btn-default" onclick="client.note.close_form()">Cancel</a>
         </div>
         <div id="note-add-button">
-          <a id="new-post" class="btn btn-primary" onclick="client.core.show_create_note_form()">New note</a>
+          <a id="new-post" class="btn btn-primary" onclick="client.note.show_create_note_form()">New note</a>
         </div>
       </div>
     </div>

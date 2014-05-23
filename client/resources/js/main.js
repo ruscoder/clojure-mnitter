@@ -30845,8 +30845,207 @@ ajax.core.POST = function() {
   POST.cljs$core$IFn$_invoke$arity$variadic = POST__delegate;
   return POST;
 }();
-goog.provide("goog.history.EventType");
-goog.history.EventType = {NAVIGATE:"navigate"};
+goog.provide("goog.dom.forms");
+goog.require("goog.structs.Map");
+goog.dom.forms.getFormDataMap = function(form) {
+  var map = new goog.structs.Map;
+  goog.dom.forms.getFormDataHelper_(form, map, goog.dom.forms.addFormDataToMap_);
+  return map;
+};
+goog.dom.forms.getFormDataString = function(form) {
+  var sb = [];
+  goog.dom.forms.getFormDataHelper_(form, sb, goog.dom.forms.addFormDataToStringBuffer_);
+  return sb.join("\x26");
+};
+goog.dom.forms.getFormDataHelper_ = function(form, result, fnAppend) {
+  var els = form.elements;
+  for (var el, i = 0;el = els[i];i++) {
+    if (el.form != form || (el.disabled || el.tagName.toLowerCase() == "fieldset")) {
+      continue;
+    }
+    var name = el.name;
+    switch(el.type.toLowerCase()) {
+      case "file":
+      ;
+      case "submit":
+      ;
+      case "reset":
+      ;
+      case "button":
+        break;
+      case "select-multiple":
+        var values = goog.dom.forms.getValue(el);
+        if (values != null) {
+          for (var value, j = 0;value = values[j];j++) {
+            fnAppend(result, name, value);
+          }
+        }
+        break;
+      default:
+        var value = goog.dom.forms.getValue(el);
+        if (value != null) {
+          fnAppend(result, name, value);
+        }
+      ;
+    }
+  }
+  var inputs = form.getElementsByTagName("input");
+  for (var input, i = 0;input = inputs[i];i++) {
+    if (input.form == form && input.type.toLowerCase() == "image") {
+      name = input.name;
+      fnAppend(result, name, input.value);
+      fnAppend(result, name + ".x", "0");
+      fnAppend(result, name + ".y", "0");
+    }
+  }
+};
+goog.dom.forms.addFormDataToMap_ = function(map, name, value) {
+  var array = map.get(name);
+  if (!array) {
+    array = [];
+    map.set(name, array);
+  }
+  array.push(value);
+};
+goog.dom.forms.addFormDataToStringBuffer_ = function(sb, name, value) {
+  sb.push(encodeURIComponent(name) + "\x3d" + encodeURIComponent(value));
+};
+goog.dom.forms.hasFileInput = function(form) {
+  var els = form.elements;
+  for (var el, i = 0;el = els[i];i++) {
+    if (!el.disabled && (el.type && el.type.toLowerCase() == "file")) {
+      return true;
+    }
+  }
+  return false;
+};
+goog.dom.forms.setDisabled = function(el, disabled) {
+  if (el.tagName == "FORM") {
+    var els = el.elements;
+    for (var i = 0;el = els[i];i++) {
+      goog.dom.forms.setDisabled(el, disabled);
+    }
+  } else {
+    if (disabled == true) {
+      el.blur();
+    }
+    el.disabled = disabled;
+  }
+};
+goog.dom.forms.focusAndSelect = function(el) {
+  el.focus();
+  if (el.select) {
+    el.select();
+  }
+};
+goog.dom.forms.hasValue = function(el) {
+  var value = goog.dom.forms.getValue(el);
+  return!!value;
+};
+goog.dom.forms.hasValueByName = function(form, name) {
+  var value = goog.dom.forms.getValueByName(form, name);
+  return!!value;
+};
+goog.dom.forms.getValue = function(el) {
+  var type = el.type;
+  if (!goog.isDef(type)) {
+    return null;
+  }
+  switch(type.toLowerCase()) {
+    case "checkbox":
+    ;
+    case "radio":
+      return goog.dom.forms.getInputChecked_(el);
+    case "select-one":
+      return goog.dom.forms.getSelectSingle_(el);
+    case "select-multiple":
+      return goog.dom.forms.getSelectMultiple_(el);
+    default:
+      return goog.isDef(el.value) ? el.value : null;
+  }
+};
+goog.dom.$F = goog.dom.forms.getValue;
+goog.dom.forms.getValueByName = function(form, name) {
+  var els = form.elements[name];
+  if (els) {
+    if (els.type) {
+      return goog.dom.forms.getValue(els);
+    } else {
+      for (var i = 0;i < els.length;i++) {
+        var val = goog.dom.forms.getValue(els[i]);
+        if (val) {
+          return val;
+        }
+      }
+    }
+  }
+  return null;
+};
+goog.dom.forms.getInputChecked_ = function(el) {
+  return el.checked ? el.value : null;
+};
+goog.dom.forms.getSelectSingle_ = function(el) {
+  var selectedIndex = el.selectedIndex;
+  return selectedIndex >= 0 ? el.options[selectedIndex].value : null;
+};
+goog.dom.forms.getSelectMultiple_ = function(el) {
+  var values = [];
+  for (var option, i = 0;option = el.options[i];i++) {
+    if (option.selected) {
+      values.push(option.value);
+    }
+  }
+  return values.length ? values : null;
+};
+goog.dom.forms.setValue = function(el, opt_value) {
+  var type = el.type;
+  if (goog.isDef(type)) {
+    switch(type.toLowerCase()) {
+      case "checkbox":
+      ;
+      case "radio":
+        goog.dom.forms.setInputChecked_(el, (opt_value));
+        break;
+      case "select-one":
+        goog.dom.forms.setSelectSingle_(el, (opt_value));
+        break;
+      case "select-multiple":
+        goog.dom.forms.setSelectMultiple_(el, (opt_value));
+        break;
+      default:
+        el.value = goog.isDefAndNotNull(opt_value) ? opt_value : "";
+    }
+  }
+};
+goog.dom.forms.setInputChecked_ = function(el, opt_value) {
+  el.checked = opt_value ? "checked" : null;
+};
+goog.dom.forms.setSelectSingle_ = function(el, opt_value) {
+  el.selectedIndex = -1;
+  if (goog.isString(opt_value)) {
+    for (var option, i = 0;option = el.options[i];i++) {
+      if (option.value == opt_value) {
+        option.selected = true;
+        break;
+      }
+    }
+  }
+};
+goog.dom.forms.setSelectMultiple_ = function(el, opt_value) {
+  if (goog.isString(opt_value)) {
+    opt_value = [opt_value];
+  }
+  for (var option, i = 0;option = el.options[i];i++) {
+    option.selected = false;
+    if (opt_value) {
+      for (var value, j = 0;value = opt_value[j];j++) {
+        if (option.value == value) {
+          option.selected = true;
+        }
+      }
+    }
+  }
+};
 goog.provide("goog.dom.BrowserFeature");
 goog.require("goog.userAgent");
 goog.dom.BrowserFeature = {CAN_ADD_NAME_OR_TYPE_ATTRIBUTES:!goog.userAgent.IE || goog.userAgent.isDocumentModeOrHigher(9), CAN_USE_CHILDREN_ATTRIBUTE:!goog.userAgent.GECKO && !goog.userAgent.IE || (goog.userAgent.IE && goog.userAgent.isDocumentModeOrHigher(9) || goog.userAgent.GECKO && goog.userAgent.isVersionOrHigher("1.9.1")), CAN_USE_INNER_TEXT:goog.userAgent.IE && !goog.userAgent.isVersionOrHigher("9"), CAN_USE_PARENT_ELEMENT_PROPERTY:goog.userAgent.IE || (goog.userAgent.OPERA || goog.userAgent.WEBKIT), 
@@ -32075,524 +32274,6 @@ goog.dom.DomHelper.prototype.isNodeList = goog.dom.isNodeList;
 goog.dom.DomHelper.prototype.getAncestorByTagNameAndClass = goog.dom.getAncestorByTagNameAndClass;
 goog.dom.DomHelper.prototype.getAncestorByClass = goog.dom.getAncestorByClass;
 goog.dom.DomHelper.prototype.getAncestor = goog.dom.getAncestor;
-goog.provide("goog.history.Event");
-goog.require("goog.events.Event");
-goog.require("goog.history.EventType");
-goog.history.Event = function(token, isNavigation) {
-  goog.events.Event.call(this, goog.history.EventType.NAVIGATE);
-  this.token = token;
-  this.isNavigation = isNavigation;
-};
-goog.inherits(goog.history.Event, goog.events.Event);
-goog.provide("goog.memoize");
-goog.memoize = function(f, opt_serializer) {
-  var serializer = opt_serializer || goog.memoize.simpleSerializer;
-  return function() {
-    if (goog.memoize.ENABLE_MEMOIZE) {
-      var thisOrGlobal = this || goog.global;
-      var cache = thisOrGlobal[goog.memoize.CACHE_PROPERTY_] || (thisOrGlobal[goog.memoize.CACHE_PROPERTY_] = {});
-      var key = serializer(goog.getUid(f), arguments);
-      return cache.hasOwnProperty(key) ? cache[key] : cache[key] = f.apply(this, arguments);
-    } else {
-      return f.apply(this, arguments);
-    }
-  };
-};
-goog.define("goog.memoize.ENABLE_MEMOIZE", true);
-goog.memoize.clearCache = function(cacheOwner) {
-  cacheOwner[goog.memoize.CACHE_PROPERTY_] = {};
-};
-goog.memoize.CACHE_PROPERTY_ = "closure_memoize_cache_";
-goog.memoize.simpleSerializer = function(functionUid, args) {
-  var context = [functionUid];
-  for (var i = args.length - 1;i >= 0;--i) {
-    context.push(typeof args[i], args[i]);
-  }
-  return context.join("\x0B");
-};
-goog.provide("goog.History");
-goog.provide("goog.History.Event");
-goog.provide("goog.History.EventType");
-goog.require("goog.Timer");
-goog.require("goog.dom");
-goog.require("goog.events.EventHandler");
-goog.require("goog.events.EventTarget");
-goog.require("goog.events.EventType");
-goog.require("goog.history.Event");
-goog.require("goog.history.EventType");
-goog.require("goog.memoize");
-goog.require("goog.string");
-goog.require("goog.userAgent");
-goog.History = function(opt_invisible, opt_blankPageUrl, opt_input, opt_iframe) {
-  goog.events.EventTarget.call(this);
-  if (opt_invisible && !opt_blankPageUrl) {
-    throw Error("Can't use invisible history without providing a blank page.");
-  }
-  var input;
-  if (opt_input) {
-    input = opt_input;
-  } else {
-    var inputId = "history_state" + goog.History.historyCount_;
-    document.write(goog.string.subs(goog.History.INPUT_TEMPLATE_, inputId, inputId));
-    input = goog.dom.getElement(inputId);
-  }
-  this.hiddenInput_ = (input);
-  this.window_ = opt_input ? goog.dom.getWindow(goog.dom.getOwnerDocument(opt_input)) : window;
-  this.iframeSrc_ = opt_blankPageUrl;
-  if (goog.userAgent.IE && !opt_blankPageUrl) {
-    this.iframeSrc_ = window.location.protocol == "https" ? "https:///" : 'javascript:""';
-  }
-  this.timer_ = new goog.Timer(goog.History.PollingType.NORMAL);
-  this.registerDisposable(this.timer_);
-  this.userVisible_ = !opt_invisible;
-  this.eventHandler_ = new goog.events.EventHandler(this);
-  if (opt_invisible || goog.History.LEGACY_IE) {
-    var iframe;
-    if (opt_iframe) {
-      iframe = opt_iframe;
-    } else {
-      var iframeId = "history_iframe" + goog.History.historyCount_;
-      var srcAttribute = this.iframeSrc_ ? 'src\x3d"' + goog.string.htmlEscape(this.iframeSrc_) + '"' : "";
-      document.write(goog.string.subs(goog.History.IFRAME_TEMPLATE_, iframeId, srcAttribute));
-      iframe = goog.dom.getElement(iframeId);
-    }
-    this.iframe_ = (iframe);
-    this.unsetIframe_ = true;
-  }
-  if (goog.History.LEGACY_IE) {
-    this.eventHandler_.listen(this.window_, goog.events.EventType.LOAD, this.onDocumentLoaded);
-    this.documentLoaded = false;
-    this.shouldEnable_ = false;
-  }
-  if (this.userVisible_) {
-    this.setHash_(this.getToken(), true);
-  } else {
-    this.setIframeToken_(this.hiddenInput_.value);
-  }
-  goog.History.historyCount_++;
-};
-goog.inherits(goog.History, goog.events.EventTarget);
-goog.History.prototype.enabled_ = false;
-goog.History.prototype.longerPolling_ = false;
-goog.History.prototype.lastToken_ = null;
-goog.History.isOnHashChangeSupported = goog.memoize(function() {
-  return goog.userAgent.IE ? document.documentMode >= 8 : "onhashchange" in goog.global;
-});
-goog.History.LEGACY_IE = goog.userAgent.IE && !goog.userAgent.isDocumentModeOrHigher(8);
-goog.History.HASH_ALWAYS_REQUIRED = goog.History.LEGACY_IE;
-goog.History.prototype.lockedToken_ = null;
-goog.History.prototype.disposeInternal = function() {
-  goog.History.superClass_.disposeInternal.call(this);
-  this.eventHandler_.dispose();
-  this.setEnabled(false);
-};
-goog.History.prototype.setEnabled = function(enable) {
-  if (enable == this.enabled_) {
-    return;
-  }
-  if (goog.History.LEGACY_IE && !this.documentLoaded) {
-    this.shouldEnable_ = enable;
-    return;
-  }
-  if (enable) {
-    if (goog.userAgent.OPERA) {
-      this.eventHandler_.listen(this.window_.document, goog.History.INPUT_EVENTS_, this.operaDefibrillator_);
-    } else {
-      if (goog.userAgent.GECKO) {
-        this.eventHandler_.listen(this.window_, "pageshow", this.onShow_);
-      }
-    }
-    if (goog.History.isOnHashChangeSupported() && this.userVisible_) {
-      this.eventHandler_.listen(this.window_, goog.events.EventType.HASHCHANGE, this.onHashChange_);
-      this.enabled_ = true;
-      this.dispatchEvent(new goog.history.Event(this.getToken(), false));
-    } else {
-      if (!goog.userAgent.IE || this.documentLoaded) {
-        this.eventHandler_.listen(this.timer_, goog.Timer.TICK, goog.bind(this.check_, this, true));
-        this.enabled_ = true;
-        if (!goog.History.LEGACY_IE) {
-          this.lastToken_ = this.getToken();
-          this.dispatchEvent(new goog.history.Event(this.getToken(), false));
-        }
-        this.timer_.start();
-      }
-    }
-  } else {
-    this.enabled_ = false;
-    this.eventHandler_.removeAll();
-    this.timer_.stop();
-  }
-};
-goog.History.prototype.onDocumentLoaded = function() {
-  this.documentLoaded = true;
-  if (this.hiddenInput_.value) {
-    this.setIframeToken_(this.hiddenInput_.value, true);
-  }
-  this.setEnabled(this.shouldEnable_);
-};
-goog.History.prototype.onShow_ = function(e) {
-  if (e.getBrowserEvent()["persisted"]) {
-    this.setEnabled(false);
-    this.setEnabled(true);
-  }
-};
-goog.History.prototype.onHashChange_ = function(e) {
-  var hash = this.getLocationFragment_(this.window_);
-  if (hash != this.lastToken_) {
-    this.update_(hash, true);
-  }
-};
-goog.History.prototype.getToken = function() {
-  if (this.lockedToken_ != null) {
-    return this.lockedToken_;
-  } else {
-    if (this.userVisible_) {
-      return this.getLocationFragment_(this.window_);
-    } else {
-      return this.getIframeToken_() || "";
-    }
-  }
-};
-goog.History.prototype.setToken = function(token, opt_title) {
-  this.setHistoryState_(token, false, opt_title);
-};
-goog.History.prototype.replaceToken = function(token, opt_title) {
-  this.setHistoryState_(token, true, opt_title);
-};
-goog.History.prototype.getLocationFragment_ = function(win) {
-  var href = win.location.href;
-  var index = href.indexOf("#");
-  return index < 0 ? "" : href.substring(index + 1);
-};
-goog.History.prototype.setHistoryState_ = function(token, replace, opt_title) {
-  if (this.getToken() != token) {
-    if (this.userVisible_) {
-      this.setHash_(token, replace);
-      if (!goog.History.isOnHashChangeSupported()) {
-        if (goog.userAgent.IE) {
-          this.setIframeToken_(token, replace, opt_title);
-        }
-      }
-      if (this.enabled_) {
-        this.check_(false);
-      }
-    } else {
-      this.setIframeToken_(token, replace);
-      this.lockedToken_ = this.lastToken_ = this.hiddenInput_.value = token;
-      this.dispatchEvent(new goog.history.Event(token, false));
-    }
-  }
-};
-goog.History.prototype.setHash_ = function(token, opt_replace) {
-  var loc = this.window_.location;
-  var url = loc.href.split("#")[0];
-  var hasHash = goog.string.contains(loc.href, "#");
-  if (goog.History.HASH_ALWAYS_REQUIRED || (hasHash || token)) {
-    url += "#" + token;
-  }
-  if (url != loc.href) {
-    if (opt_replace) {
-      loc.replace(url);
-    } else {
-      loc.href = url;
-    }
-  }
-};
-goog.History.prototype.setIframeToken_ = function(token, opt_replace, opt_title) {
-  if (this.unsetIframe_ || token != this.getIframeToken_()) {
-    this.unsetIframe_ = false;
-    token = goog.string.urlEncode(token);
-    if (goog.userAgent.IE) {
-      var doc = goog.dom.getFrameContentDocument(this.iframe_);
-      doc.open("text/html", opt_replace ? "replace" : undefined);
-      doc.write(goog.string.subs(goog.History.IFRAME_SOURCE_TEMPLATE_, goog.string.htmlEscape((opt_title || this.window_.document.title)), token));
-      doc.close();
-    } else {
-      var url = this.iframeSrc_ + "#" + token;
-      var contentWindow = this.iframe_.contentWindow;
-      if (contentWindow) {
-        if (opt_replace) {
-          contentWindow.location.replace(url);
-        } else {
-          contentWindow.location.href = url;
-        }
-      }
-    }
-  }
-};
-goog.History.prototype.getIframeToken_ = function() {
-  if (goog.userAgent.IE) {
-    var doc = goog.dom.getFrameContentDocument(this.iframe_);
-    return doc.body ? goog.string.urlDecode(doc.body.innerHTML) : null;
-  } else {
-    var contentWindow = this.iframe_.contentWindow;
-    if (contentWindow) {
-      var hash;
-      try {
-        hash = goog.string.urlDecode(this.getLocationFragment_(contentWindow));
-      } catch (e) {
-        if (!this.longerPolling_) {
-          this.setLongerPolling_(true);
-        }
-        return null;
-      }
-      if (this.longerPolling_) {
-        this.setLongerPolling_(false);
-      }
-      return hash || null;
-    } else {
-      return null;
-    }
-  }
-};
-goog.History.prototype.check_ = function(isNavigation) {
-  if (this.userVisible_) {
-    var hash = this.getLocationFragment_(this.window_);
-    if (hash != this.lastToken_) {
-      this.update_(hash, isNavigation);
-    }
-  }
-  if (!this.userVisible_ || goog.History.LEGACY_IE) {
-    var token = this.getIframeToken_() || "";
-    if (this.lockedToken_ == null || token == this.lockedToken_) {
-      this.lockedToken_ = null;
-      if (token != this.lastToken_) {
-        this.update_(token, isNavigation);
-      }
-    }
-  }
-};
-goog.History.prototype.update_ = function(token, isNavigation) {
-  this.lastToken_ = this.hiddenInput_.value = token;
-  if (this.userVisible_) {
-    if (goog.History.LEGACY_IE) {
-      this.setIframeToken_(token);
-    }
-    this.setHash_(token);
-  } else {
-    this.setIframeToken_(token);
-  }
-  this.dispatchEvent(new goog.history.Event(this.getToken(), isNavigation));
-};
-goog.History.prototype.setLongerPolling_ = function(longerPolling) {
-  if (this.longerPolling_ != longerPolling) {
-    this.timer_.setInterval(longerPolling ? goog.History.PollingType.LONG : goog.History.PollingType.NORMAL);
-  }
-  this.longerPolling_ = longerPolling;
-};
-goog.History.prototype.operaDefibrillator_ = function() {
-  this.timer_.stop();
-  this.timer_.start();
-};
-goog.History.INPUT_EVENTS_ = [goog.events.EventType.MOUSEDOWN, goog.events.EventType.KEYDOWN, goog.events.EventType.MOUSEMOVE];
-goog.History.IFRAME_SOURCE_TEMPLATE_ = "\x3ctitle\x3e%s\x3c/title\x3e\x3cbody\x3e%s\x3c/body\x3e";
-goog.History.IFRAME_TEMPLATE_ = '\x3ciframe id\x3d"%s" style\x3d"display:none" %s\x3e\x3c/iframe\x3e';
-goog.History.INPUT_TEMPLATE_ = '\x3cinput type\x3d"text" name\x3d"%s" id\x3d"%s" style\x3d"display:none"\x3e';
-goog.History.historyCount_ = 0;
-goog.History.PollingType = {NORMAL:150, LONG:1E4};
-goog.History.EventType = goog.history.EventType;
-goog.History.Event = goog.history.Event;
-goog.provide("goog.dom.forms");
-goog.require("goog.structs.Map");
-goog.dom.forms.getFormDataMap = function(form) {
-  var map = new goog.structs.Map;
-  goog.dom.forms.getFormDataHelper_(form, map, goog.dom.forms.addFormDataToMap_);
-  return map;
-};
-goog.dom.forms.getFormDataString = function(form) {
-  var sb = [];
-  goog.dom.forms.getFormDataHelper_(form, sb, goog.dom.forms.addFormDataToStringBuffer_);
-  return sb.join("\x26");
-};
-goog.dom.forms.getFormDataHelper_ = function(form, result, fnAppend) {
-  var els = form.elements;
-  for (var el, i = 0;el = els[i];i++) {
-    if (el.form != form || (el.disabled || el.tagName.toLowerCase() == "fieldset")) {
-      continue;
-    }
-    var name = el.name;
-    switch(el.type.toLowerCase()) {
-      case "file":
-      ;
-      case "submit":
-      ;
-      case "reset":
-      ;
-      case "button":
-        break;
-      case "select-multiple":
-        var values = goog.dom.forms.getValue(el);
-        if (values != null) {
-          for (var value, j = 0;value = values[j];j++) {
-            fnAppend(result, name, value);
-          }
-        }
-        break;
-      default:
-        var value = goog.dom.forms.getValue(el);
-        if (value != null) {
-          fnAppend(result, name, value);
-        }
-      ;
-    }
-  }
-  var inputs = form.getElementsByTagName("input");
-  for (var input, i = 0;input = inputs[i];i++) {
-    if (input.form == form && input.type.toLowerCase() == "image") {
-      name = input.name;
-      fnAppend(result, name, input.value);
-      fnAppend(result, name + ".x", "0");
-      fnAppend(result, name + ".y", "0");
-    }
-  }
-};
-goog.dom.forms.addFormDataToMap_ = function(map, name, value) {
-  var array = map.get(name);
-  if (!array) {
-    array = [];
-    map.set(name, array);
-  }
-  array.push(value);
-};
-goog.dom.forms.addFormDataToStringBuffer_ = function(sb, name, value) {
-  sb.push(encodeURIComponent(name) + "\x3d" + encodeURIComponent(value));
-};
-goog.dom.forms.hasFileInput = function(form) {
-  var els = form.elements;
-  for (var el, i = 0;el = els[i];i++) {
-    if (!el.disabled && (el.type && el.type.toLowerCase() == "file")) {
-      return true;
-    }
-  }
-  return false;
-};
-goog.dom.forms.setDisabled = function(el, disabled) {
-  if (el.tagName == "FORM") {
-    var els = el.elements;
-    for (var i = 0;el = els[i];i++) {
-      goog.dom.forms.setDisabled(el, disabled);
-    }
-  } else {
-    if (disabled == true) {
-      el.blur();
-    }
-    el.disabled = disabled;
-  }
-};
-goog.dom.forms.focusAndSelect = function(el) {
-  el.focus();
-  if (el.select) {
-    el.select();
-  }
-};
-goog.dom.forms.hasValue = function(el) {
-  var value = goog.dom.forms.getValue(el);
-  return!!value;
-};
-goog.dom.forms.hasValueByName = function(form, name) {
-  var value = goog.dom.forms.getValueByName(form, name);
-  return!!value;
-};
-goog.dom.forms.getValue = function(el) {
-  var type = el.type;
-  if (!goog.isDef(type)) {
-    return null;
-  }
-  switch(type.toLowerCase()) {
-    case "checkbox":
-    ;
-    case "radio":
-      return goog.dom.forms.getInputChecked_(el);
-    case "select-one":
-      return goog.dom.forms.getSelectSingle_(el);
-    case "select-multiple":
-      return goog.dom.forms.getSelectMultiple_(el);
-    default:
-      return goog.isDef(el.value) ? el.value : null;
-  }
-};
-goog.dom.$F = goog.dom.forms.getValue;
-goog.dom.forms.getValueByName = function(form, name) {
-  var els = form.elements[name];
-  if (els) {
-    if (els.type) {
-      return goog.dom.forms.getValue(els);
-    } else {
-      for (var i = 0;i < els.length;i++) {
-        var val = goog.dom.forms.getValue(els[i]);
-        if (val) {
-          return val;
-        }
-      }
-    }
-  }
-  return null;
-};
-goog.dom.forms.getInputChecked_ = function(el) {
-  return el.checked ? el.value : null;
-};
-goog.dom.forms.getSelectSingle_ = function(el) {
-  var selectedIndex = el.selectedIndex;
-  return selectedIndex >= 0 ? el.options[selectedIndex].value : null;
-};
-goog.dom.forms.getSelectMultiple_ = function(el) {
-  var values = [];
-  for (var option, i = 0;option = el.options[i];i++) {
-    if (option.selected) {
-      values.push(option.value);
-    }
-  }
-  return values.length ? values : null;
-};
-goog.dom.forms.setValue = function(el, opt_value) {
-  var type = el.type;
-  if (goog.isDef(type)) {
-    switch(type.toLowerCase()) {
-      case "checkbox":
-      ;
-      case "radio":
-        goog.dom.forms.setInputChecked_(el, (opt_value));
-        break;
-      case "select-one":
-        goog.dom.forms.setSelectSingle_(el, (opt_value));
-        break;
-      case "select-multiple":
-        goog.dom.forms.setSelectMultiple_(el, (opt_value));
-        break;
-      default:
-        el.value = goog.isDefAndNotNull(opt_value) ? opt_value : "";
-    }
-  }
-};
-goog.dom.forms.setInputChecked_ = function(el, opt_value) {
-  el.checked = opt_value ? "checked" : null;
-};
-goog.dom.forms.setSelectSingle_ = function(el, opt_value) {
-  el.selectedIndex = -1;
-  if (goog.isString(opt_value)) {
-    for (var option, i = 0;option = el.options[i];i++) {
-      if (option.value == opt_value) {
-        option.selected = true;
-        break;
-      }
-    }
-  }
-};
-goog.dom.forms.setSelectMultiple_ = function(el, opt_value) {
-  if (goog.isString(opt_value)) {
-    opt_value = [opt_value];
-  }
-  for (var option, i = 0;option = el.options[i];i++) {
-    option.selected = false;
-    if (opt_value) {
-      for (var value, j = 0;value = opt_value[j];j++) {
-        if (option.value == value) {
-          option.selected = true;
-        }
-      }
-    }
-  }
-};
 goog.provide("domina.support");
 goog.require("cljs.core");
 goog.require("goog.events");
@@ -39791,6 +39472,588 @@ enfocus.core.apply_transform["function"] = function() {
   };
   return G__7387;
 }();
+goog.provide("goog.history.EventType");
+goog.history.EventType = {NAVIGATE:"navigate"};
+goog.provide("goog.history.Event");
+goog.require("goog.events.Event");
+goog.require("goog.history.EventType");
+goog.history.Event = function(token, isNavigation) {
+  goog.events.Event.call(this, goog.history.EventType.NAVIGATE);
+  this.token = token;
+  this.isNavigation = isNavigation;
+};
+goog.inherits(goog.history.Event, goog.events.Event);
+goog.provide("goog.memoize");
+goog.memoize = function(f, opt_serializer) {
+  var serializer = opt_serializer || goog.memoize.simpleSerializer;
+  return function() {
+    if (goog.memoize.ENABLE_MEMOIZE) {
+      var thisOrGlobal = this || goog.global;
+      var cache = thisOrGlobal[goog.memoize.CACHE_PROPERTY_] || (thisOrGlobal[goog.memoize.CACHE_PROPERTY_] = {});
+      var key = serializer(goog.getUid(f), arguments);
+      return cache.hasOwnProperty(key) ? cache[key] : cache[key] = f.apply(this, arguments);
+    } else {
+      return f.apply(this, arguments);
+    }
+  };
+};
+goog.define("goog.memoize.ENABLE_MEMOIZE", true);
+goog.memoize.clearCache = function(cacheOwner) {
+  cacheOwner[goog.memoize.CACHE_PROPERTY_] = {};
+};
+goog.memoize.CACHE_PROPERTY_ = "closure_memoize_cache_";
+goog.memoize.simpleSerializer = function(functionUid, args) {
+  var context = [functionUid];
+  for (var i = args.length - 1;i >= 0;--i) {
+    context.push(typeof args[i], args[i]);
+  }
+  return context.join("\x0B");
+};
+goog.provide("goog.History");
+goog.provide("goog.History.Event");
+goog.provide("goog.History.EventType");
+goog.require("goog.Timer");
+goog.require("goog.dom");
+goog.require("goog.events.EventHandler");
+goog.require("goog.events.EventTarget");
+goog.require("goog.events.EventType");
+goog.require("goog.history.Event");
+goog.require("goog.history.EventType");
+goog.require("goog.memoize");
+goog.require("goog.string");
+goog.require("goog.userAgent");
+goog.History = function(opt_invisible, opt_blankPageUrl, opt_input, opt_iframe) {
+  goog.events.EventTarget.call(this);
+  if (opt_invisible && !opt_blankPageUrl) {
+    throw Error("Can't use invisible history without providing a blank page.");
+  }
+  var input;
+  if (opt_input) {
+    input = opt_input;
+  } else {
+    var inputId = "history_state" + goog.History.historyCount_;
+    document.write(goog.string.subs(goog.History.INPUT_TEMPLATE_, inputId, inputId));
+    input = goog.dom.getElement(inputId);
+  }
+  this.hiddenInput_ = (input);
+  this.window_ = opt_input ? goog.dom.getWindow(goog.dom.getOwnerDocument(opt_input)) : window;
+  this.iframeSrc_ = opt_blankPageUrl;
+  if (goog.userAgent.IE && !opt_blankPageUrl) {
+    this.iframeSrc_ = window.location.protocol == "https" ? "https:///" : 'javascript:""';
+  }
+  this.timer_ = new goog.Timer(goog.History.PollingType.NORMAL);
+  this.registerDisposable(this.timer_);
+  this.userVisible_ = !opt_invisible;
+  this.eventHandler_ = new goog.events.EventHandler(this);
+  if (opt_invisible || goog.History.LEGACY_IE) {
+    var iframe;
+    if (opt_iframe) {
+      iframe = opt_iframe;
+    } else {
+      var iframeId = "history_iframe" + goog.History.historyCount_;
+      var srcAttribute = this.iframeSrc_ ? 'src\x3d"' + goog.string.htmlEscape(this.iframeSrc_) + '"' : "";
+      document.write(goog.string.subs(goog.History.IFRAME_TEMPLATE_, iframeId, srcAttribute));
+      iframe = goog.dom.getElement(iframeId);
+    }
+    this.iframe_ = (iframe);
+    this.unsetIframe_ = true;
+  }
+  if (goog.History.LEGACY_IE) {
+    this.eventHandler_.listen(this.window_, goog.events.EventType.LOAD, this.onDocumentLoaded);
+    this.documentLoaded = false;
+    this.shouldEnable_ = false;
+  }
+  if (this.userVisible_) {
+    this.setHash_(this.getToken(), true);
+  } else {
+    this.setIframeToken_(this.hiddenInput_.value);
+  }
+  goog.History.historyCount_++;
+};
+goog.inherits(goog.History, goog.events.EventTarget);
+goog.History.prototype.enabled_ = false;
+goog.History.prototype.longerPolling_ = false;
+goog.History.prototype.lastToken_ = null;
+goog.History.isOnHashChangeSupported = goog.memoize(function() {
+  return goog.userAgent.IE ? document.documentMode >= 8 : "onhashchange" in goog.global;
+});
+goog.History.LEGACY_IE = goog.userAgent.IE && !goog.userAgent.isDocumentModeOrHigher(8);
+goog.History.HASH_ALWAYS_REQUIRED = goog.History.LEGACY_IE;
+goog.History.prototype.lockedToken_ = null;
+goog.History.prototype.disposeInternal = function() {
+  goog.History.superClass_.disposeInternal.call(this);
+  this.eventHandler_.dispose();
+  this.setEnabled(false);
+};
+goog.History.prototype.setEnabled = function(enable) {
+  if (enable == this.enabled_) {
+    return;
+  }
+  if (goog.History.LEGACY_IE && !this.documentLoaded) {
+    this.shouldEnable_ = enable;
+    return;
+  }
+  if (enable) {
+    if (goog.userAgent.OPERA) {
+      this.eventHandler_.listen(this.window_.document, goog.History.INPUT_EVENTS_, this.operaDefibrillator_);
+    } else {
+      if (goog.userAgent.GECKO) {
+        this.eventHandler_.listen(this.window_, "pageshow", this.onShow_);
+      }
+    }
+    if (goog.History.isOnHashChangeSupported() && this.userVisible_) {
+      this.eventHandler_.listen(this.window_, goog.events.EventType.HASHCHANGE, this.onHashChange_);
+      this.enabled_ = true;
+      this.dispatchEvent(new goog.history.Event(this.getToken(), false));
+    } else {
+      if (!goog.userAgent.IE || this.documentLoaded) {
+        this.eventHandler_.listen(this.timer_, goog.Timer.TICK, goog.bind(this.check_, this, true));
+        this.enabled_ = true;
+        if (!goog.History.LEGACY_IE) {
+          this.lastToken_ = this.getToken();
+          this.dispatchEvent(new goog.history.Event(this.getToken(), false));
+        }
+        this.timer_.start();
+      }
+    }
+  } else {
+    this.enabled_ = false;
+    this.eventHandler_.removeAll();
+    this.timer_.stop();
+  }
+};
+goog.History.prototype.onDocumentLoaded = function() {
+  this.documentLoaded = true;
+  if (this.hiddenInput_.value) {
+    this.setIframeToken_(this.hiddenInput_.value, true);
+  }
+  this.setEnabled(this.shouldEnable_);
+};
+goog.History.prototype.onShow_ = function(e) {
+  if (e.getBrowserEvent()["persisted"]) {
+    this.setEnabled(false);
+    this.setEnabled(true);
+  }
+};
+goog.History.prototype.onHashChange_ = function(e) {
+  var hash = this.getLocationFragment_(this.window_);
+  if (hash != this.lastToken_) {
+    this.update_(hash, true);
+  }
+};
+goog.History.prototype.getToken = function() {
+  if (this.lockedToken_ != null) {
+    return this.lockedToken_;
+  } else {
+    if (this.userVisible_) {
+      return this.getLocationFragment_(this.window_);
+    } else {
+      return this.getIframeToken_() || "";
+    }
+  }
+};
+goog.History.prototype.setToken = function(token, opt_title) {
+  this.setHistoryState_(token, false, opt_title);
+};
+goog.History.prototype.replaceToken = function(token, opt_title) {
+  this.setHistoryState_(token, true, opt_title);
+};
+goog.History.prototype.getLocationFragment_ = function(win) {
+  var href = win.location.href;
+  var index = href.indexOf("#");
+  return index < 0 ? "" : href.substring(index + 1);
+};
+goog.History.prototype.setHistoryState_ = function(token, replace, opt_title) {
+  if (this.getToken() != token) {
+    if (this.userVisible_) {
+      this.setHash_(token, replace);
+      if (!goog.History.isOnHashChangeSupported()) {
+        if (goog.userAgent.IE) {
+          this.setIframeToken_(token, replace, opt_title);
+        }
+      }
+      if (this.enabled_) {
+        this.check_(false);
+      }
+    } else {
+      this.setIframeToken_(token, replace);
+      this.lockedToken_ = this.lastToken_ = this.hiddenInput_.value = token;
+      this.dispatchEvent(new goog.history.Event(token, false));
+    }
+  }
+};
+goog.History.prototype.setHash_ = function(token, opt_replace) {
+  var loc = this.window_.location;
+  var url = loc.href.split("#")[0];
+  var hasHash = goog.string.contains(loc.href, "#");
+  if (goog.History.HASH_ALWAYS_REQUIRED || (hasHash || token)) {
+    url += "#" + token;
+  }
+  if (url != loc.href) {
+    if (opt_replace) {
+      loc.replace(url);
+    } else {
+      loc.href = url;
+    }
+  }
+};
+goog.History.prototype.setIframeToken_ = function(token, opt_replace, opt_title) {
+  if (this.unsetIframe_ || token != this.getIframeToken_()) {
+    this.unsetIframe_ = false;
+    token = goog.string.urlEncode(token);
+    if (goog.userAgent.IE) {
+      var doc = goog.dom.getFrameContentDocument(this.iframe_);
+      doc.open("text/html", opt_replace ? "replace" : undefined);
+      doc.write(goog.string.subs(goog.History.IFRAME_SOURCE_TEMPLATE_, goog.string.htmlEscape((opt_title || this.window_.document.title)), token));
+      doc.close();
+    } else {
+      var url = this.iframeSrc_ + "#" + token;
+      var contentWindow = this.iframe_.contentWindow;
+      if (contentWindow) {
+        if (opt_replace) {
+          contentWindow.location.replace(url);
+        } else {
+          contentWindow.location.href = url;
+        }
+      }
+    }
+  }
+};
+goog.History.prototype.getIframeToken_ = function() {
+  if (goog.userAgent.IE) {
+    var doc = goog.dom.getFrameContentDocument(this.iframe_);
+    return doc.body ? goog.string.urlDecode(doc.body.innerHTML) : null;
+  } else {
+    var contentWindow = this.iframe_.contentWindow;
+    if (contentWindow) {
+      var hash;
+      try {
+        hash = goog.string.urlDecode(this.getLocationFragment_(contentWindow));
+      } catch (e) {
+        if (!this.longerPolling_) {
+          this.setLongerPolling_(true);
+        }
+        return null;
+      }
+      if (this.longerPolling_) {
+        this.setLongerPolling_(false);
+      }
+      return hash || null;
+    } else {
+      return null;
+    }
+  }
+};
+goog.History.prototype.check_ = function(isNavigation) {
+  if (this.userVisible_) {
+    var hash = this.getLocationFragment_(this.window_);
+    if (hash != this.lastToken_) {
+      this.update_(hash, isNavigation);
+    }
+  }
+  if (!this.userVisible_ || goog.History.LEGACY_IE) {
+    var token = this.getIframeToken_() || "";
+    if (this.lockedToken_ == null || token == this.lockedToken_) {
+      this.lockedToken_ = null;
+      if (token != this.lastToken_) {
+        this.update_(token, isNavigation);
+      }
+    }
+  }
+};
+goog.History.prototype.update_ = function(token, isNavigation) {
+  this.lastToken_ = this.hiddenInput_.value = token;
+  if (this.userVisible_) {
+    if (goog.History.LEGACY_IE) {
+      this.setIframeToken_(token);
+    }
+    this.setHash_(token);
+  } else {
+    this.setIframeToken_(token);
+  }
+  this.dispatchEvent(new goog.history.Event(this.getToken(), isNavigation));
+};
+goog.History.prototype.setLongerPolling_ = function(longerPolling) {
+  if (this.longerPolling_ != longerPolling) {
+    this.timer_.setInterval(longerPolling ? goog.History.PollingType.LONG : goog.History.PollingType.NORMAL);
+  }
+  this.longerPolling_ = longerPolling;
+};
+goog.History.prototype.operaDefibrillator_ = function() {
+  this.timer_.stop();
+  this.timer_.start();
+};
+goog.History.INPUT_EVENTS_ = [goog.events.EventType.MOUSEDOWN, goog.events.EventType.KEYDOWN, goog.events.EventType.MOUSEMOVE];
+goog.History.IFRAME_SOURCE_TEMPLATE_ = "\x3ctitle\x3e%s\x3c/title\x3e\x3cbody\x3e%s\x3c/body\x3e";
+goog.History.IFRAME_TEMPLATE_ = '\x3ciframe id\x3d"%s" style\x3d"display:none" %s\x3e\x3c/iframe\x3e';
+goog.History.INPUT_TEMPLATE_ = '\x3cinput type\x3d"text" name\x3d"%s" id\x3d"%s" style\x3d"display:none"\x3e';
+goog.History.historyCount_ = 0;
+goog.History.PollingType = {NORMAL:150, LONG:1E4};
+goog.History.EventType = goog.history.EventType;
+goog.History.Event = goog.history.Event;
+goog.provide("client.common");
+goog.require("cljs.core");
+goog.require("goog.History");
+client.common.error_handler = function error_handler(p__6547) {
+  var map__6549 = p__6547;
+  var map__6549__$1 = cljs.core.seq_QMARK_.call(null, map__6549) ? cljs.core.apply.call(null, cljs.core.hash_map, map__6549) : map__6549;
+  var status_text = cljs.core.get.call(null, map__6549__$1, new cljs.core.Keyword(null, "status-text", "status-text", 4371493274));
+  var status = cljs.core.get.call(null, map__6549__$1, new cljs.core.Keyword(null, "status", "status", 4416389988));
+  return console.log([cljs.core.str("Something bad happened: "), cljs.core.str(status), cljs.core.str(" "), cljs.core.str(status_text)].join(""));
+};
+client.common.current_username = cljs.core.atom.call(null, null);
+client.common.current_username = null;
+client.common.goog_history = new goog.History;
+client.common.get_current_location_user = function get_current_location_user() {
+  return client.common.goog_history.getToken().substring(1);
+};
+goog.provide("client.note");
+goog.require("cljs.core");
+goog.require("client.common");
+goog.require("ajax.core");
+goog.require("client.common");
+goog.require("cljs.reader");
+goog.require("cljs.reader");
+goog.require("ajax.core");
+goog.require("enfocus.core");
+goog.require("enfocus.core");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.note.note_create_form = function note_create_form() {
+  var vec__5815 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form");
+  }.call(null);
+  var id_sym5812 = cljs.core.nth.call(null, vec__5815, 0, null);
+  var pnod5813 = cljs.core.nth.call(null, vec__5815, 1, null);
+  var pnod5813__$1 = enfocus.core.create_hidden_dom.call(null, pnod5813);
+  enfocus.core.i_at.call(null, id_sym5812, pnod5813__$1);
+  enfocus.core.reset_ids.call(null, id_sym5812, pnod5813__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5813__$1);
+};
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.note.note_form_container = function note_form_container() {
+  var vec__5819 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form-container");
+  }.call(null);
+  var id_sym5816 = cljs.core.nth.call(null, vec__5819, 0, null);
+  var pnod5817 = cljs.core.nth.call(null, vec__5819, 1, null);
+  var pnod5817__$1 = enfocus.core.create_hidden_dom.call(null, pnod5817);
+  enfocus.core.i_at.call(null, id_sym5816, pnod5817__$1);
+  enfocus.core.reset_ids.call(null, id_sym5816, pnod5817__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5817__$1);
+};
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.note.note_add_button = function note_add_button() {
+  var vec__5823 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-add-button");
+  }.call(null);
+  var id_sym5820 = cljs.core.nth.call(null, vec__5823, 0, null);
+  var pnod5821 = cljs.core.nth.call(null, vec__5823, 1, null);
+  var pnod5821__$1 = enfocus.core.create_hidden_dom.call(null, pnod5821);
+  enfocus.core.i_at.call(null, id_sym5820, pnod5821__$1);
+  enfocus.core.reset_ids.call(null, id_sym5820, pnod5821__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5821__$1);
+};
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.note.note_edit_form = function note_edit_form(id, content) {
+  var vec__5827 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form");
+  }.call(null);
+  var id_sym5824 = cljs.core.nth.call(null, vec__5827, 0, null);
+  var pnod5825 = cljs.core.nth.call(null, vec__5827, 1, null);
+  var pnod5825__$1 = enfocus.core.create_hidden_dom.call(null, pnod5825);
+  enfocus.core.i_at.call(null, id_sym5824, pnod5825__$1, "#note-content", enfocus.core.content.call(null, content), "#save-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.try_update_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#cancel-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.show_note_by_id("), cljs.core.str(id), 
+  cljs.core.str(")")].join("")));
+  enfocus.core.reset_ids.call(null, id_sym5824, pnod5825__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5825__$1);
+};
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.note.note_post = function note_post(p__5830) {
+  var map__5833 = p__5830;
+  var map__5833__$1 = cljs.core.seq_QMARK_.call(null, map__5833) ? cljs.core.apply.call(null, cljs.core.hash_map, map__5833) : map__5833;
+  var content = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "content", "content", 1965434859));
+  var date = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "date", "date", 1016980256));
+  var username = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "username", "username", 748190792));
+  var id = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  var vec__5834 = function(map__5833, map__5833__$1, content, date, username, id) {
+    return function() {
+      return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-post");
+    };
+  }(map__5833, map__5833__$1, content, date, username, id).call(null);
+  var id_sym5828 = cljs.core.nth.call(null, vec__5834, 0, null);
+  var pnod5829 = cljs.core.nth.call(null, vec__5834, 1, null);
+  var pnod5829__$1 = enfocus.core.create_hidden_dom.call(null, pnod5829);
+  enfocus.core.i_at.call(null, id_sym5828, pnod5829__$1, "#note-post", enfocus.core.add_class.call(null, [cljs.core.str("note-post-"), cljs.core.str(id)].join("")), "#content", enfocus.core.content.call(null, content), "#date", enfocus.core.content.call(null, date.toLocaleString()), "#username", enfocus.core.content.call(null, username), "#controls", cljs.core._EQ_.call(null, client.common.current_username, username) ? enfocus.core.remove_class.call(null, "hidden") : enfocus.core.add_class.call(null, 
+  "hidden"), "#note-edit", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.show_edit_note_form("), cljs.core.str(id), cljs.core.str(")")].join("")), "#note-delete", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("if(confirm('Really delete?')) client.note.try_delete_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#username-link", enfocus.core.set_attr.call(null, 
+  new cljs.core.Keyword(null, "href", "href", 1017115293), [cljs.core.str("/#/"), cljs.core.str(username)].join("")));
+  enfocus.core.reset_ids.call(null, id_sym5828, pnod5829__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5829__$1);
+};
+client.note.notes_count = cljs.core.atom.call(null, 0);
+client.note.hide_new_note_btn = function hide_new_note_btn() {
+  return enfocus.core.at.call(null, "#new-post", enfocus.core.add_class.call(null, "hidden"));
+};
+client.note.show_create_note_form = function show_create_note_form() {
+  enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, client.note.note_create_form.call(null)));
+  return client.note.hide_new_note_btn.call(null);
+};
+goog.exportSymbol("client.note.show_create_note_form", client.note.show_create_note_form);
+client.note.note_loaded = function note_loaded(data) {
+  var selector = [cljs.core.str(".note-post-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(data))].join("");
+  return enfocus.core.at.call(null, selector, enfocus.core.content.call(null, client.note.note_post.call(null, data)));
+};
+client.note.note_loaded_new = function note_loaded_new(data) {
+  var username = (new cljs.core.Keyword(null, "username", "username", 748190792)).cljs$core$IFn$_invoke$arity$1(data);
+  var location_user = client.common.get_current_location_user.call(null);
+  if (cljs.core._EQ_.call(null, location_user, username) || cljs.core.empty_QMARK_.call(null, location_user)) {
+    client.note.notes_count = client.note.notes_count + 1;
+    return enfocus.core.at.call(null, "#inner-content", enfocus.core.prepend.call(null, client.note.note_post.call(null, data)));
+  } else {
+    return null;
+  }
+};
+client.note.show_note_by_id = function show_note_by_id(id) {
+  return ajax.core.GET.call(null, [cljs.core.str("/note/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.note.note_loaded], null));
+};
+goog.exportSymbol("client.note.show_note_by_id", client.note.show_note_by_id);
+client.note.add_note_by_id = function add_note_by_id(id) {
+  return ajax.core.GET.call(null, [cljs.core.str("/note/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.note.note_loaded_new], null));
+};
+goog.exportSymbol("client.note.add_note_by_id", client.note.add_note_by_id);
+client.note.remove_note_by_id = function remove_note_by_id(id) {
+  return enfocus.core.at.call(null, [cljs.core.str(".note-post-"), cljs.core.str(id)].join(""), enfocus.core.remove_node.call(null));
+};
+goog.exportSymbol("client.note.remove_note_by_id", client.note.remove_note_by_id);
+client.note.show_edit_note_form = function show_edit_note_form(id) {
+  var selector = [cljs.core.str(".note-post-"), cljs.core.str(id)].join("");
+  var content = enfocus.core.from.call(null, [cljs.core.str(selector), cljs.core.str(" "), cljs.core.str("#content")].join(""), enfocus.core.get_text.call(null));
+  return enfocus.core.at.call(null, selector, enfocus.core.content.call(null, client.note.note_edit_form.call(null, id, content)));
+};
+goog.exportSymbol("client.note.show_edit_note_form", client.note.show_edit_note_form);
+client.note.close_form = function close_form() {
+  return enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, client.note.note_add_button.call(null)));
+};
+goog.exportSymbol("client.note.close_form", client.note.close_form);
+client.note.note_saved = function note_saved(response) {
+  return client.note.close_form.call(null);
+};
+client.note.try_update_note = function try_update_note(id) {
+  return ajax.core.POST.call(null, [cljs.core.str("/note/update/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "content", "content", 1965434859), enfocus.core.from.call(null, "#note-content", enfocus.core.read_form_input.call(null))], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.note.note_saved, new cljs.core.Keyword(null, 
+  "error-handler", "error-handler", 1866823671), client.common.error_handler], null));
+};
+goog.exportSymbol("client.note.try_update_note", client.note.try_update_note);
+client.note.try_delete_note = function try_delete_note(id) {
+  return ajax.core.POST.call(null, [cljs.core.str("/note/delete/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.common.error_handler], null));
+};
+goog.exportSymbol("client.note.try_delete_note", client.note.try_delete_note);
+client.note.try_create_note = function try_create_note() {
+  var content = enfocus.core.from.call(null, "#note-content", enfocus.core.read_form_input.call(null)).trim();
+  var len = content.length;
+  if (len === 0) {
+    return alert("Please, write content!");
+  } else {
+    return ajax.core.POST.call(null, "/note/create", new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "content", "content", 1965434859), content], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.note.note_saved, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.common.error_handler], null));
+  }
+};
+goog.exportSymbol("client.note.try_create_note", client.note.try_create_note);
+client.note.note_list = function note_list(data) {
+  client.note.notes_count = cljs.core.count.call(null, data);
+  return enfocus.core.at.call(null, "#inner-content", enfocus.core.content.call(null, cljs.core.map.call(null, client.note.note_post, data)));
+};
+client.note.try_load_notes = function try_load_notes(path) {
+  if (cljs.core.truth_(client.common.current_username)) {
+    return ajax.core.GET.call(null, [cljs.core.str(path)].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.note.note_list, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.common.error_handler], null));
+  } else {
+    return setTimeout(function() {
+      return try_load_notes.call(null, path);
+    }, 10);
+  }
+};
+client.note.more_note_list = function more_note_list(data) {
+  client.note.notes_count = client.note.notes_count + cljs.core.count.call(null, data);
+  return enfocus.core.at.call(null, "#inner-content", enfocus.core.append.call(null, cljs.core.map.call(null, client.note.note_post, data)));
+};
+client.note.try_load_more_notes = function try_load_more_notes(path) {
+  return ajax.core.GET.call(null, [cljs.core.str(path)].join(""), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "offset", "offset", 4289091589), client.note.notes_count], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.note.more_note_list, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.common.error_handler], 
+  null));
+};
+client.note.load_more_notes = function load_more_notes() {
+  var location_user = client.common.get_current_location_user.call(null);
+  if (cljs.core.empty_QMARK_.call(null, location_user)) {
+    return client.note.try_load_more_notes.call(null, "/note/list-all");
+  } else {
+    return client.note.try_load_more_notes.call(null, [cljs.core.str("/note/list-user/"), cljs.core.str(location_user)].join(""));
+  }
+};
+goog.exportSymbol("client.note.load_more_notes", client.note.load_more_notes);
+client.note.try_load_notes_for_user = function try_load_notes_for_user(user) {
+  return client.note.try_load_notes.call(null, [cljs.core.str("/note/list-user/"), cljs.core.str(user)].join(""));
+};
+client.note.try_load_notes_all = function try_load_notes_all() {
+  return client.note.try_load_notes.call(null, "/note/list-all");
+};
+client.note.ws_message_received = function ws_message_received(p__5835) {
+  var map__5838 = p__5835;
+  var map__5838__$1 = cljs.core.seq_QMARK_.call(null, map__5838) ? cljs.core.apply.call(null, cljs.core.hash_map, map__5838) : map__5838;
+  var id = cljs.core.get.call(null, map__5838__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  var mtype = cljs.core.get.call(null, map__5838__$1, new cljs.core.Keyword(null, "mtype", "mtype", 1118143641));
+  var G__5839 = mtype;
+  if (cljs.core._EQ_.call(null, "delete", G__5839)) {
+    return client.note.remove_note_by_id.call(null, id);
+  } else {
+    if (cljs.core._EQ_.call(null, "create", G__5839)) {
+      return client.note.add_note_by_id.call(null, id);
+    } else {
+      if (cljs.core._EQ_.call(null, "update", G__5839)) {
+        return client.note.show_note_by_id.call(null, id);
+      } else {
+        if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
+          throw new Error([cljs.core.str("No matching clause: "), cljs.core.str(mtype)].join(""));
+        } else {
+          return null;
+        }
+      }
+    }
+  }
+};
+client.note.ws_data_received = function ws_data_received(raw_data) {
+  var vec__5841 = cljs.reader.read_string.call(null, raw_data);
+  var command = cljs.core.nth.call(null, vec__5841, 0, null);
+  var channel = cljs.core.nth.call(null, vec__5841, 1, null);
+  var data = cljs.core.nth.call(null, vec__5841, 2, null);
+  if (cljs.core._EQ_.call(null, command, "message")) {
+    return client.note.ws_message_received.call(null, cljs.reader.read_string.call(null, data));
+  } else {
+    return null;
+  }
+};
+client.note.init_websocket = function init_websocket(url) {
+  var ws = new WebSocket(url);
+  return ws.onmessage = function(ws) {
+    return function(p1__5842_SHARP_) {
+      return client.note.ws_data_received.call(null, p1__5842_SHARP_.data);
+    };
+  }(ws);
+};
 goog.provide("clojure.walk");
 goog.require("cljs.core");
 clojure.walk.walk = function walk(inner, outer, form) {
@@ -40506,318 +40769,116 @@ secretary.core.render_route["string"] = function(this$, params) {
     return path__$1;
   }
 };
-goog.provide("client.core");
+goog.provide("client.user");
 goog.require("cljs.core");
+goog.require("client.common");
+goog.require("client.note");
+goog.require("ajax.core");
+goog.require("client.note");
+goog.require("client.common");
+goog.require("secretary.core");
+goog.require("secretary.core");
 goog.require("ajax.core");
 goog.require("enfocus.core");
-goog.require("ajax.core");
-goog.require("secretary.core");
-goog.require("goog.history.EventType");
-goog.require("goog.History");
-goog.require("goog.events");
 goog.require("enfocus.core");
-goog.require("secretary.core");
-goog.require("cljs.reader");
-goog.require("goog.events");
-goog.require("cljs.reader");
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
-client.core.mnitter_header = function mnitter_header() {
-  var vec__17690 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#header");
-  }.call(null);
-  var id_sym17687 = cljs.core.nth.call(null, vec__17690, 0, null);
-  var pnod17688 = cljs.core.nth.call(null, vec__17690, 1, null);
-  var pnod17688__$1 = enfocus.core.create_hidden_dom.call(null, pnod17688);
-  enfocus.core.i_at.call(null, id_sym17687, pnod17688__$1);
-  enfocus.core.reset_ids.call(null, id_sym17687, pnod17688__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17688__$1);
-};
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.mnitter_sidebar = function mnitter_sidebar() {
-  var vec__17694 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#sidebar");
-  }.call(null);
-  var id_sym17691 = cljs.core.nth.call(null, vec__17694, 0, null);
-  var pnod17692 = cljs.core.nth.call(null, vec__17694, 1, null);
-  var pnod17692__$1 = enfocus.core.create_hidden_dom.call(null, pnod17692);
-  enfocus.core.i_at.call(null, id_sym17691, pnod17692__$1);
-  enfocus.core.reset_ids.call(null, id_sym17691, pnod17692__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17692__$1);
-};
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.mnitter_content = function mnitter_content() {
-  var vec__17698 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#content");
-  }.call(null);
-  var id_sym17695 = cljs.core.nth.call(null, vec__17698, 0, null);
-  var pnod17696 = cljs.core.nth.call(null, vec__17698, 1, null);
-  var pnod17696__$1 = enfocus.core.create_hidden_dom.call(null, pnod17696);
-  enfocus.core.i_at.call(null, id_sym17695, pnod17696__$1);
-  enfocus.core.reset_ids.call(null, id_sym17695, pnod17696__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17696__$1);
-};
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.note_create_form = function note_create_form() {
-  var vec__17702 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form");
-  }.call(null);
-  var id_sym17699 = cljs.core.nth.call(null, vec__17702, 0, null);
-  var pnod17700 = cljs.core.nth.call(null, vec__17702, 1, null);
-  var pnod17700__$1 = enfocus.core.create_hidden_dom.call(null, pnod17700);
-  enfocus.core.i_at.call(null, id_sym17699, pnod17700__$1);
-  enfocus.core.reset_ids.call(null, id_sym17699, pnod17700__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17700__$1);
-};
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.reg_form = function reg_form() {
-  var vec__17706 = function() {
+client.user.reg_form = function reg_form() {
+  var vec__6074 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#reg-form");
   }.call(null);
-  var id_sym17703 = cljs.core.nth.call(null, vec__17706, 0, null);
-  var pnod17704 = cljs.core.nth.call(null, vec__17706, 1, null);
-  var pnod17704__$1 = enfocus.core.create_hidden_dom.call(null, pnod17704);
-  enfocus.core.i_at.call(null, id_sym17703, pnod17704__$1);
-  enfocus.core.reset_ids.call(null, id_sym17703, pnod17704__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17704__$1);
+  var id_sym6071 = cljs.core.nth.call(null, vec__6074, 0, null);
+  var pnod6072 = cljs.core.nth.call(null, vec__6074, 1, null);
+  var pnod6072__$1 = enfocus.core.create_hidden_dom.call(null, pnod6072);
+  enfocus.core.i_at.call(null, id_sym6071, pnod6072__$1);
+  enfocus.core.reset_ids.call(null, id_sym6071, pnod6072__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod6072__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
-client.core.login_form = function login_form() {
-  var vec__17710 = function() {
+client.user.login_form = function login_form() {
+  var vec__6078 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#login-form");
   }.call(null);
-  var id_sym17707 = cljs.core.nth.call(null, vec__17710, 0, null);
-  var pnod17708 = cljs.core.nth.call(null, vec__17710, 1, null);
-  var pnod17708__$1 = enfocus.core.create_hidden_dom.call(null, pnod17708);
-  enfocus.core.i_at.call(null, id_sym17707, pnod17708__$1);
-  enfocus.core.reset_ids.call(null, id_sym17707, pnod17708__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17708__$1);
+  var id_sym6075 = cljs.core.nth.call(null, vec__6078, 0, null);
+  var pnod6076 = cljs.core.nth.call(null, vec__6078, 1, null);
+  var pnod6076__$1 = enfocus.core.create_hidden_dom.call(null, pnod6076);
+  enfocus.core.i_at.call(null, id_sym6075, pnod6076__$1);
+  enfocus.core.reset_ids.call(null, id_sym6075, pnod6076__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod6076__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
-client.core.userinfo_form = function userinfo_form(username) {
-  var vec__17714 = function() {
+client.user.userinfo_form = function userinfo_form(username) {
+  var vec__6082 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#userinfo-form");
   }.call(null);
-  var id_sym17711 = cljs.core.nth.call(null, vec__17714, 0, null);
-  var pnod17712 = cljs.core.nth.call(null, vec__17714, 1, null);
-  var pnod17712__$1 = enfocus.core.create_hidden_dom.call(null, pnod17712);
-  enfocus.core.i_at.call(null, id_sym17711, pnod17712__$1, "#username", enfocus.core.content.call(null, username));
-  enfocus.core.reset_ids.call(null, id_sym17711, pnod17712__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17712__$1);
+  var id_sym6079 = cljs.core.nth.call(null, vec__6082, 0, null);
+  var pnod6080 = cljs.core.nth.call(null, vec__6082, 1, null);
+  var pnod6080__$1 = enfocus.core.create_hidden_dom.call(null, pnod6080);
+  enfocus.core.i_at.call(null, id_sym6079, pnod6080__$1, "#username", enfocus.core.content.call(null, username));
+  enfocus.core.reset_ids.call(null, id_sym6079, pnod6080__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod6080__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.note_form_container = function note_form_container() {
-  var vec__17718 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form-container");
-  }.call(null);
-  var id_sym17715 = cljs.core.nth.call(null, vec__17718, 0, null);
-  var pnod17716 = cljs.core.nth.call(null, vec__17718, 1, null);
-  var pnod17716__$1 = enfocus.core.create_hidden_dom.call(null, pnod17716);
-  enfocus.core.i_at.call(null, id_sym17715, pnod17716__$1);
-  enfocus.core.reset_ids.call(null, id_sym17715, pnod17716__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17716__$1);
+client.user.show_reg_form = function show_reg_form() {
+  return enfocus.core.at.call(null, "#sidebar", enfocus.core.content.call(null, client.user.reg_form.call(null)));
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.note_add_button = function note_add_button() {
-  var vec__17722 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-add-button");
-  }.call(null);
-  var id_sym17719 = cljs.core.nth.call(null, vec__17722, 0, null);
-  var pnod17720 = cljs.core.nth.call(null, vec__17722, 1, null);
-  var pnod17720__$1 = enfocus.core.create_hidden_dom.call(null, pnod17720);
-  enfocus.core.i_at.call(null, id_sym17719, pnod17720__$1);
-  enfocus.core.reset_ids.call(null, id_sym17719, pnod17720__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17720__$1);
-};
-client.core.current_username = cljs.core.atom.call(null, null);
-client.core.notes_count = cljs.core.atom.call(null, 0);
-client.core.goog_history = new goog.History;
-client.core.current_username = null;
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.note_edit_form = function note_edit_form(id, content) {
-  var vec__17726 = function() {
-    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form");
-  }.call(null);
-  var id_sym17723 = cljs.core.nth.call(null, vec__17726, 0, null);
-  var pnod17724 = cljs.core.nth.call(null, vec__17726, 1, null);
-  var pnod17724__$1 = enfocus.core.create_hidden_dom.call(null, pnod17724);
-  enfocus.core.i_at.call(null, id_sym17723, pnod17724__$1, "#note-content", enfocus.core.content.call(null, content), "#save-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.core.try_update_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#cancel-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.core.show_note_by_id("), cljs.core.str(id), 
-  cljs.core.str(")")].join("")));
-  enfocus.core.reset_ids.call(null, id_sym17723, pnod17724__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17724__$1);
-};
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5644_");
-if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
-  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
-} else {
-}
-client.core.note_post = function note_post(p__17729) {
-  var map__17732 = p__17729;
-  var map__17732__$1 = cljs.core.seq_QMARK_.call(null, map__17732) ? cljs.core.apply.call(null, cljs.core.hash_map, map__17732) : map__17732;
-  var content = cljs.core.get.call(null, map__17732__$1, new cljs.core.Keyword(null, "content", "content", 1965434859));
-  var date = cljs.core.get.call(null, map__17732__$1, new cljs.core.Keyword(null, "date", "date", 1016980256));
-  var username = cljs.core.get.call(null, map__17732__$1, new cljs.core.Keyword(null, "username", "username", 748190792));
-  var id = cljs.core.get.call(null, map__17732__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  var vec__17733 = function(map__17732, map__17732__$1, content, date, username, id) {
-    return function() {
-      return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-post");
-    };
-  }(map__17732, map__17732__$1, content, date, username, id).call(null);
-  var id_sym17727 = cljs.core.nth.call(null, vec__17733, 0, null);
-  var pnod17728 = cljs.core.nth.call(null, vec__17733, 1, null);
-  var pnod17728__$1 = enfocus.core.create_hidden_dom.call(null, pnod17728);
-  enfocus.core.i_at.call(null, id_sym17727, pnod17728__$1, "#note-post", enfocus.core.add_class.call(null, [cljs.core.str("note-post-"), cljs.core.str(id)].join("")), "#content", enfocus.core.content.call(null, content), "#date", enfocus.core.content.call(null, date.toLocaleString()), "#username", enfocus.core.content.call(null, username), "#controls", cljs.core._EQ_.call(null, client.core.current_username, username) ? enfocus.core.remove_class.call(null, "hidden") : enfocus.core.add_class.call(null, 
-  "hidden"), "#note-edit", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.core.show_edit_note_form("), cljs.core.str(id), cljs.core.str(")")].join("")), "#note-delete", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("if(confirm('Really delete?')) client.core.try_delete_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#username-link", enfocus.core.set_attr.call(null, 
-  new cljs.core.Keyword(null, "href", "href", 1017115293), [cljs.core.str("/#/"), cljs.core.str(username)].join("")));
-  enfocus.core.reset_ids.call(null, id_sym17727, pnod17728__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod17728__$1);
-};
-client.core.get_current_location_user = function get_current_location_user() {
-  return client.core.goog_history.getToken().substring(1);
-};
-client.core.show_reg_form = function show_reg_form() {
-  return enfocus.core.at.call(null, "#sidebar", enfocus.core.content.call(null, client.core.reg_form.call(null)));
-};
-goog.exportSymbol("client.core.show_reg_form", client.core.show_reg_form);
-client.core.show_login_form = function show_login_form() {
-  enfocus.core.at.call(null, "#sidebar", enfocus.core.content.call(null, client.core.login_form.call(null)));
+goog.exportSymbol("client.user.show_reg_form", client.user.show_reg_form);
+client.user.show_login_form = function show_login_form() {
+  enfocus.core.at.call(null, "#sidebar", enfocus.core.content.call(null, client.user.login_form.call(null)));
   return enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, ""));
 };
-goog.exportSymbol("client.core.show_login_form", client.core.show_login_form);
-client.core.userinfo_success = function userinfo_success(data) {
-  var username_17734 = (new cljs.core.Keyword(null, "username", "username", 748190792)).cljs$core$IFn$_invoke$arity$1(data);
-  client.core.current_username = username_17734;
-  enfocus.core.at.call(null, "#sidebar", enfocus.core.content.call(null, client.core.userinfo_form.call(null, username_17734)));
-  return enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, client.core.note_add_button.call(null)));
+goog.exportSymbol("client.user.show_login_form", client.user.show_login_form);
+client.user.userinfo_success = function userinfo_success(data) {
+  var username_6083 = (new cljs.core.Keyword(null, "username", "username", 748190792)).cljs$core$IFn$_invoke$arity$1(data);
+  client.common.current_username = username_6083;
+  enfocus.core.at.call(null, "#sidebar", enfocus.core.content.call(null, client.user.userinfo_form.call(null, username_6083)));
+  return enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, client.note.note_add_button.call(null)));
 };
-client.core.userinfo_failed = function userinfo_failed(status, status_text) {
-  client.core.current_username = "anonymous";
-  return client.core.show_login_form.call(null);
+client.user.userinfo_failed = function userinfo_failed(status, status_text) {
+  client.common.current_username = "anonymous";
+  return client.user.show_login_form.call(null);
 };
-client.core.try_load_userinfo = function try_load_userinfo() {
-  return ajax.core.GET.call(null, "/user/", new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.userinfo_success, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.userinfo_failed], null));
+client.user.try_load_userinfo = function try_load_userinfo() {
+  return ajax.core.GET.call(null, "/user/", new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.user.userinfo_success, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.user.userinfo_failed], null));
 };
-client.core.hide_new_post_btn = function hide_new_post_btn() {
-  return enfocus.core.at.call(null, "#new-post", enfocus.core.add_class.call(null, "hidden"));
-};
-client.core.show_create_note_form = function show_create_note_form() {
-  enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, client.core.note_create_form.call(null)));
-  return client.core.hide_new_post_btn.call(null);
-};
-goog.exportSymbol("client.core.show_create_note_form", client.core.show_create_note_form);
-client.core.note_loaded = function note_loaded(data) {
-  var selector = [cljs.core.str(".note-post-"), cljs.core.str((new cljs.core.Keyword(null, "id", "id", 1013907597)).cljs$core$IFn$_invoke$arity$1(data))].join("");
-  return enfocus.core.at.call(null, selector, enfocus.core.content.call(null, client.core.note_post.call(null, data)));
-};
-client.core.note_loaded_new = function note_loaded_new(data) {
-  var username = (new cljs.core.Keyword(null, "username", "username", 748190792)).cljs$core$IFn$_invoke$arity$1(data);
-  var location_user = client.core.get_current_location_user.call(null);
-  if (cljs.core._EQ_.call(null, location_user, username) || cljs.core.empty_QMARK_.call(null, location_user)) {
-    client.core.notes_count = client.core.notes_count + 1;
-    return enfocus.core.at.call(null, "#inner-content", enfocus.core.prepend.call(null, client.core.note_post.call(null, data)));
-  } else {
-    return null;
-  }
-};
-client.core.show_note_by_id = function show_note_by_id(id) {
-  return ajax.core.GET.call(null, [cljs.core.str("/note/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.note_loaded], null));
-};
-goog.exportSymbol("client.core.show_note_by_id", client.core.show_note_by_id);
-client.core.add_note_by_id = function add_note_by_id(id) {
-  return ajax.core.GET.call(null, [cljs.core.str("/note/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.note_loaded_new], null));
-};
-goog.exportSymbol("client.core.add_note_by_id", client.core.add_note_by_id);
-client.core.remove_note_by_id = function remove_note_by_id(id) {
-  return enfocus.core.at.call(null, [cljs.core.str(".note-post-"), cljs.core.str(id)].join(""), enfocus.core.remove_node.call(null));
-};
-goog.exportSymbol("client.core.remove_note_by_id", client.core.remove_note_by_id);
-client.core.show_edit_note_form = function show_edit_note_form(id) {
-  var selector = [cljs.core.str(".note-post-"), cljs.core.str(id)].join("");
-  var content = enfocus.core.from.call(null, [cljs.core.str(selector), cljs.core.str(" "), cljs.core.str("#content")].join(""), enfocus.core.get_text.call(null));
-  return enfocus.core.at.call(null, selector, enfocus.core.content.call(null, client.core.note_edit_form.call(null, id, content)));
-};
-goog.exportSymbol("client.core.show_edit_note_form", client.core.show_edit_note_form);
-client.core.close_form = function close_form() {
-  return enfocus.core.at.call(null, "#note-form-container", enfocus.core.content.call(null, client.core.note_add_button.call(null)));
-};
-goog.exportSymbol("client.core.close_form", client.core.close_form);
-client.core.error_handler = function error_handler(p__17735) {
-  var map__17737 = p__17735;
-  var map__17737__$1 = cljs.core.seq_QMARK_.call(null, map__17737) ? cljs.core.apply.call(null, cljs.core.hash_map, map__17737) : map__17737;
-  var status_text = cljs.core.get.call(null, map__17737__$1, new cljs.core.Keyword(null, "status-text", "status-text", 4371493274));
-  var status = cljs.core.get.call(null, map__17737__$1, new cljs.core.Keyword(null, "status", "status", 4416389988));
-  return console.log([cljs.core.str("Something bad happened: "), cljs.core.str(status), cljs.core.str(" "), cljs.core.str(status_text)].join(""));
-};
-client.core.note_saved = function note_saved(response) {
-  return client.core.close_form.call(null);
-};
-client.core.user_login_success = function user_login_success() {
-  client.core.try_load_userinfo.call(null);
+client.user.user_login_success = function user_login_success() {
+  client.user.try_load_userinfo.call(null);
   return secretary.core.dispatch_BANG_.call(null, "/");
 };
-client.core.user_logout_success = function user_logout_success() {
-  client.core.try_load_userinfo.call(null);
-  return secretary.core.dispatch_BANG_.call(null, "/");
-};
-client.core.user_login_failed = function user_login_failed() {
+client.user.user_login_failed = function user_login_failed() {
   return alert("Not authenticated: invalid login or password.");
 };
-client.core.user_login = function user_login() {
+client.user.user_login = function user_login() {
   return ajax.core.POST.call(null, "/user/auth", new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "username", "username", 748190792), enfocus.core.from.call(null, "#user-username", enfocus.core.read_form_input.call(null)), new cljs.core.Keyword(null, "password", "password", 2230889997), enfocus.core.from.call(null, "#user-password", enfocus.core.read_form_input.call(null))], 
-  null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.user_login_success, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.user_login_failed], null));
+  null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.user.user_login_success, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.user.user_login_failed], null));
 };
-goog.exportSymbol("client.core.user_login", client.core.user_login);
-client.core.user_logout = function user_logout() {
-  return ajax.core.GET.call(null, "/user/logout", new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.user_logout_success], null));
+goog.exportSymbol("client.user.user_login", client.user.user_login);
+client.user.user_logout_success = function user_logout_success() {
+  client.user.try_load_userinfo.call(null);
+  return secretary.core.dispatch_BANG_.call(null, "/");
 };
-goog.exportSymbol("client.core.user_logout", client.core.user_logout);
-client.core.user_reg_success = function user_reg_success(data) {
+client.user.user_logout = function user_logout() {
+  return ajax.core.GET.call(null, "/user/logout", new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.user.user_logout_success], null));
+};
+goog.exportSymbol("client.user.user_logout", client.user.user_logout);
+client.user.user_reg_success = function user_reg_success(data) {
   alert("Registration complete. Use login form for login!");
-  return client.core.show_login_form.call(null);
+  return client.user.show_login_form.call(null);
 };
-client.core.user_reg_failed = function user_reg_failed(status, status_text) {
+client.user.user_reg_failed = function user_reg_failed(status, status_text) {
   return alert("User with this username or email is exists!");
 };
-client.core.user_reg = function user_reg() {
+client.user.user_reg = function user_reg() {
   var username = enfocus.core.from.call(null, "#user-username", enfocus.core.read_form_input.call(null));
   var email = enfocus.core.from.call(null, "#user-email", enfocus.core.read_form_input.call(null));
   var password = enfocus.core.from.call(null, "#user-password", enfocus.core.read_form_input.call(null));
@@ -40825,173 +40886,140 @@ client.core.user_reg = function user_reg() {
   if (cljs.core.not_EQ_.call(null, password, password_retry)) {
     return alert("Password's is not equal!");
   } else {
-    return ajax.core.POST.call(null, "/user/create", new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "username", "username", 748190792), username, new cljs.core.Keyword(null, "email", "email", 1110523662), email, new cljs.core.Keyword(null, "password", "password", 2230889997), password], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.user_reg_success, 
-    new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.user_reg_failed], null));
+    return ajax.core.POST.call(null, "/user/create", new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "username", "username", 748190792), username, new cljs.core.Keyword(null, "email", "email", 1110523662), email, new cljs.core.Keyword(null, "password", "password", 2230889997), password], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.user.user_reg_success, 
+    new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.user.user_reg_failed], null));
   }
 };
-goog.exportSymbol("client.core.user_reg", client.core.user_reg);
-client.core.try_update_note = function try_update_note(id) {
-  return ajax.core.POST.call(null, [cljs.core.str("/note/update/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "content", "content", 1965434859), enfocus.core.from.call(null, "#note-content", enfocus.core.read_form_input.call(null))], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.note_saved, new cljs.core.Keyword(null, 
-  "error-handler", "error-handler", 1866823671), client.core.error_handler], null));
+goog.exportSymbol("client.user.user_reg", client.user.user_reg);
+goog.provide("client.core");
+goog.require("cljs.core");
+goog.require("client.note");
+goog.require("client.common");
+goog.require("client.user");
+goog.require("ajax.core");
+goog.require("client.note");
+goog.require("enfocus.core");
+goog.require("ajax.core");
+goog.require("secretary.core");
+goog.require("goog.history.EventType");
+goog.require("client.user");
+goog.require("goog.events");
+goog.require("enfocus.core");
+goog.require("secretary.core");
+goog.require("goog.events");
+goog.require("client.common");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.core.mnitter_header = function mnitter_header() {
+  var vec__6053 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#header");
+  }.call(null);
+  var id_sym6050 = cljs.core.nth.call(null, vec__6053, 0, null);
+  var pnod6051 = cljs.core.nth.call(null, vec__6053, 1, null);
+  var pnod6051__$1 = enfocus.core.create_hidden_dom.call(null, pnod6051);
+  enfocus.core.i_at.call(null, id_sym6050, pnod6051__$1);
+  enfocus.core.reset_ids.call(null, id_sym6050, pnod6051__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod6051__$1);
 };
-goog.exportSymbol("client.core.try_update_note", client.core.try_update_note);
-client.core.try_delete_note = function try_delete_note(id) {
-  return ajax.core.POST.call(null, [cljs.core.str("/note/delete/"), cljs.core.str(id)].join(""), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.error_handler], null));
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.core.mnitter_sidebar = function mnitter_sidebar() {
+  var vec__6057 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#sidebar");
+  }.call(null);
+  var id_sym6054 = cljs.core.nth.call(null, vec__6057, 0, null);
+  var pnod6055 = cljs.core.nth.call(null, vec__6057, 1, null);
+  var pnod6055__$1 = enfocus.core.create_hidden_dom.call(null, pnod6055);
+  enfocus.core.i_at.call(null, id_sym6054, pnod6055__$1);
+  enfocus.core.reset_ids.call(null, id_sym6054, pnod6055__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod6055__$1);
 };
-goog.exportSymbol("client.core.try_delete_note", client.core.try_delete_note);
-client.core.try_create_note = function try_create_note() {
-  var content = enfocus.core.from.call(null, "#note-content", enfocus.core.read_form_input.call(null)).trim();
-  var len = content.length;
-  if (len === 0) {
-    return alert("Please, write content!");
-  } else {
-    return ajax.core.POST.call(null, "/note/create", new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "content", "content", 1965434859), content], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.note_saved, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.error_handler], null));
-  }
-};
-goog.exportSymbol("client.core.try_create_note", client.core.try_create_note);
-client.core.note_list = function note_list(data) {
-  client.core.notes_count = cljs.core.count.call(null, data);
-  return enfocus.core.at.call(null, "#inner-content", enfocus.core.content.call(null, cljs.core.map.call(null, client.core.note_post, data)));
-};
-client.core.try_load_notes = function try_load_notes(path) {
-  if (cljs.core.truth_(client.core.current_username)) {
-    return ajax.core.GET.call(null, [cljs.core.str(path)].join(""), new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.note_list, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.error_handler], null));
-  } else {
-    return setTimeout(function() {
-      return try_load_notes.call(null, path);
-    }, 10);
-  }
-};
-client.core.more_note_list = function more_note_list(data) {
-  client.core.notes_count = client.core.notes_count + cljs.core.count.call(null, data);
-  return enfocus.core.at.call(null, "#inner-content", enfocus.core.append.call(null, cljs.core.map.call(null, client.core.note_post, data)));
-};
-client.core.try_load_more_notes = function try_load_more_notes(path) {
-  return ajax.core.GET.call(null, [cljs.core.str(path)].join(""), new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null, "params", "params", 4313443576), new cljs.core.PersistentArrayMap(null, 1, [new cljs.core.Keyword(null, "offset", "offset", 4289091589), client.core.notes_count], null), new cljs.core.Keyword(null, "handler", "handler", 1706707644), client.core.more_note_list, new cljs.core.Keyword(null, "error-handler", "error-handler", 1866823671), client.core.error_handler], 
-  null));
-};
-client.core.load_more_notes = function load_more_notes() {
-  var location_user = client.core.get_current_location_user.call(null);
-  if (cljs.core.empty_QMARK_.call(null, location_user)) {
-    return client.core.try_load_more_notes.call(null, "/note/list-all");
-  } else {
-    return client.core.try_load_more_notes.call(null, [cljs.core.str("/note/list-user/"), cljs.core.str(location_user)].join(""));
-  }
-};
-goog.exportSymbol("client.core.load_more_notes", client.core.load_more_notes);
-client.core.try_load_notes_for_user = function try_load_notes_for_user(user) {
-  return client.core.try_load_notes.call(null, [cljs.core.str("/note/list-user/"), cljs.core.str(user)].join(""));
-};
-client.core.try_load_notes_all = function try_load_notes_all() {
-  return client.core.try_load_notes.call(null, "/note/list-all");
-};
-var action__4426__auto___17740 = function(params__4427__auto__) {
-  if (cljs.core.map_QMARK_.call(null, params__4427__auto__)) {
-    var map__17738 = params__4427__auto__;
-    var map__17738__$1 = cljs.core.seq_QMARK_.call(null, map__17738) ? cljs.core.apply.call(null, cljs.core.hash_map, map__17738) : map__17738;
-    return client.core.try_load_notes_all.call(null);
-  } else {
-    if (cljs.core.vector_QMARK_.call(null, params__4427__auto__)) {
-      var vec__17739 = params__4427__auto__;
-      return client.core.try_load_notes_all.call(null);
-    } else {
-      return null;
-    }
-  }
-};
-secretary.core.add_route_BANG_.call(null, "/", action__4426__auto___17740);
-var action__4426__auto___17743 = function(params__4427__auto__) {
-  if (cljs.core.map_QMARK_.call(null, params__4427__auto__)) {
-    var map__17741 = params__4427__auto__;
-    var map__17741__$1 = cljs.core.seq_QMARK_.call(null, map__17741) ? cljs.core.apply.call(null, cljs.core.hash_map, map__17741) : map__17741;
-    var user = cljs.core.get.call(null, map__17741__$1, new cljs.core.Keyword(null, "user", "user", 1017503549));
-    return client.core.try_load_notes_for_user.call(null, user);
-  } else {
-    if (cljs.core.vector_QMARK_.call(null, params__4427__auto__)) {
-      var vec__17742 = params__4427__auto__;
-      var user = cljs.core.nth.call(null, vec__17742, 0, null);
-      return client.core.try_load_notes_for_user.call(null, user);
-    } else {
-      return null;
-    }
-  }
-};
-secretary.core.add_route_BANG_.call(null, "/:user", action__4426__auto___17743);
-client.core.ws_message_received = function ws_message_received(p__17744) {
-  var map__17747 = p__17744;
-  var map__17747__$1 = cljs.core.seq_QMARK_.call(null, map__17747) ? cljs.core.apply.call(null, cljs.core.hash_map, map__17747) : map__17747;
-  var id = cljs.core.get.call(null, map__17747__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  var mtype = cljs.core.get.call(null, map__17747__$1, new cljs.core.Keyword(null, "mtype", "mtype", 1118143641));
-  var G__17748 = mtype;
-  if (cljs.core._EQ_.call(null, "delete", G__17748)) {
-    return client.core.remove_note_by_id.call(null, id);
-  } else {
-    if (cljs.core._EQ_.call(null, "create", G__17748)) {
-      return client.core.add_note_by_id.call(null, id);
-    } else {
-      if (cljs.core._EQ_.call(null, "update", G__17748)) {
-        return client.core.show_note_by_id.call(null, id);
-      } else {
-        if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
-          throw new Error([cljs.core.str("No matching clause: "), cljs.core.str(mtype)].join(""));
-        } else {
-          return null;
-        }
-      }
-    }
-  }
-};
-client.core.ws_data_received = function ws_data_received(raw_data) {
-  var vec__17750 = cljs.reader.read_string.call(null, raw_data);
-  var command = cljs.core.nth.call(null, vec__17750, 0, null);
-  var channel = cljs.core.nth.call(null, vec__17750, 1, null);
-  var data = cljs.core.nth.call(null, vec__17750, 2, null);
-  if (cljs.core._EQ_.call(null, command, "message")) {
-    return client.core.ws_message_received.call(null, cljs.reader.read_string.call(null, data));
-  } else {
-    return null;
-  }
-};
-client.core.init_websocket = function init_websocket(url) {
-  var ws = new WebSocket(url);
-  return ws.onmessage = function(ws) {
-    return function(p1__17751_SHARP_) {
-      return client.core.ws_data_received.call(null, p1__17751_SHARP_.data);
-    };
-  }(ws);
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
+  cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
+} else {
+}
+client.core.mnitter_content = function mnitter_content() {
+  var vec__6061 = function() {
+    return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#content");
+  }.call(null);
+  var id_sym6058 = cljs.core.nth.call(null, vec__6061, 0, null);
+  var pnod6059 = cljs.core.nth.call(null, vec__6061, 1, null);
+  var pnod6059__$1 = enfocus.core.create_hidden_dom.call(null, pnod6059);
+  enfocus.core.i_at.call(null, id_sym6058, pnod6059__$1);
+  enfocus.core.reset_ids.call(null, id_sym6058, pnod6059__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod6059__$1);
 };
 client.core.start = function start() {
   enfocus.core.at.call(null, ".container", enfocus.core.do__GT_.call(null, enfocus.core.content.call(null, client.core.mnitter_header.call(null)), enfocus.core.append.call(null, client.core.mnitter_content.call(null)), enfocus.core.append.call(null, client.core.mnitter_sidebar.call(null))));
-  client.core.try_load_userinfo.call(null);
-  return client.core.init_websocket.call(null, [cljs.core.str("ws://"), cljs.core.str(location.host), cljs.core.str("/rpc")].join(""));
+  client.user.try_load_userinfo.call(null);
+  return client.note.init_websocket.call(null, [cljs.core.str("ws://"), cljs.core.str(location.host), cljs.core.str("/rpc")].join(""));
 };
+var action__4866__auto___6064 = function(params__4867__auto__) {
+  if (cljs.core.map_QMARK_.call(null, params__4867__auto__)) {
+    var map__6062 = params__4867__auto__;
+    var map__6062__$1 = cljs.core.seq_QMARK_.call(null, map__6062) ? cljs.core.apply.call(null, cljs.core.hash_map, map__6062) : map__6062;
+    return client.note.try_load_notes_all.call(null);
+  } else {
+    if (cljs.core.vector_QMARK_.call(null, params__4867__auto__)) {
+      var vec__6063 = params__4867__auto__;
+      return client.note.try_load_notes_all.call(null);
+    } else {
+      return null;
+    }
+  }
+};
+secretary.core.add_route_BANG_.call(null, "/", action__4866__auto___6064);
+var action__4866__auto___6067 = function(params__4867__auto__) {
+  if (cljs.core.map_QMARK_.call(null, params__4867__auto__)) {
+    var map__6065 = params__4867__auto__;
+    var map__6065__$1 = cljs.core.seq_QMARK_.call(null, map__6065) ? cljs.core.apply.call(null, cljs.core.hash_map, map__6065) : map__6065;
+    var user = cljs.core.get.call(null, map__6065__$1, new cljs.core.Keyword(null, "user", "user", 1017503549));
+    return client.note.try_load_notes_for_user.call(null, user);
+  } else {
+    if (cljs.core.vector_QMARK_.call(null, params__4867__auto__)) {
+      var vec__6066 = params__4867__auto__;
+      var user = cljs.core.nth.call(null, vec__6066, 0, null);
+      return client.note.try_load_notes_for_user.call(null, user);
+    } else {
+      return null;
+    }
+  }
+};
+secretary.core.add_route_BANG_.call(null, "/:user", action__4866__auto___6067);
 window.onload = function() {
-  return enfocus.core.setTimeout.call(null, function check__4564__auto__() {
+  return enfocus.core.setTimeout.call(null, function check__5004__auto__() {
     if (cljs.core.deref.call(null, enfocus.core.tpl_load_cnt) === 0) {
       return client.core.start.call(null);
     } else {
       return enfocus.core.setTimeout.call(null, function() {
-        return check__4564__auto__.call(null);
+        return check__5004__auto__.call(null);
       }, 10);
     }
   }, 0);
 };
-var G__17753_17754 = client.core.goog_history;
-goog.events.listen(G__17753_17754, goog.history.EventType.NAVIGATE, function(G__17753_17754) {
-  return function(p1__17752_SHARP_) {
-    return enfocus.core.setTimeout.call(null, function(G__17753_17754) {
-      return function check__4564__auto__() {
+var G__6069_6070 = client.common.goog_history;
+goog.events.listen(G__6069_6070, goog.history.EventType.NAVIGATE, function(G__6069_6070) {
+  return function(p1__6068_SHARP_) {
+    return enfocus.core.setTimeout.call(null, function(G__6069_6070) {
+      return function check__5004__auto__() {
         if (cljs.core.deref.call(null, enfocus.core.tpl_load_cnt) === 0) {
-          return secretary.core.dispatch_BANG_.call(null, p1__17752_SHARP_.token);
+          return secretary.core.dispatch_BANG_.call(null, p1__6068_SHARP_.token);
         } else {
-          return enfocus.core.setTimeout.call(null, function(G__17753_17754) {
+          return enfocus.core.setTimeout.call(null, function(G__6069_6070) {
             return function() {
-              return check__4564__auto__.call(null);
+              return check__5004__auto__.call(null);
             };
-          }(G__17753_17754), 10);
+          }(G__6069_6070), 10);
         }
       };
-    }(G__17753_17754), 0);
+    }(G__6069_6070), 0);
   };
-}(G__17753_17754));
-G__17753_17754.setEnabled(true);
+}(G__6069_6070));
+G__6069_6070.setEnabled(true);
