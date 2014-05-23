@@ -1,54 +1,67 @@
 (ns client.core
   (:require [enfocus.core :as ef]
             [ajax.core :refer [GET POST]]
+            [cljs.reader :as reader]
             [secretary.core :as secretary :include-macros true :refer [defroute]]
             [goog.events :as events])
   (:require-macros [enfocus.macros :as em])
   (:import goog.History
            goog.history.EventType))
 
-(em/defsnippet blog-header "/html/base.html" ".blog-header" [])
-(em/defsnippet blog-sidebar "/html/base.html" "#sidebar" [])
-(em/defsnippet blog-content "/html/base.html" "#content" [])
-(em/defsnippet blog-create-post "/html/base.html" "#article-form" [])
+(em/defsnippet mnitter-header "/html/base.html" "#header" [])
+(em/defsnippet mnitter-sidebar "/html/base.html" "#sidebar" [])
+(em/defsnippet mnitter-content "/html/base.html" "#content" [])
+(em/defsnippet note-create-form "/html/base.html" "#note-form" [])
 (em/defsnippet reg-form "/html/base.html" "#reg-form" [])
 (em/defsnippet login-form "/html/base.html" "#login-form" [])
 (em/defsnippet userinfo-form "/html/base.html" "#userinfo-form" [username]
                "#username" (ef/content username))
+(em/defsnippet note-form-container "/html/base.html" "#note-form-container" [])
+(em/defsnippet note-add-button "/html/base.html" "#note-add-button" [])
 
-(em/defsnippet blog-edit-post "/html/base.html" "#article-form"
-  [{:keys [id title body]}]
-  "#article-title" (ef/set-attr :value title)
-  "#article-body" (ef/content body)
-  "#save-btn" (ef/set-attr :onclick (str "client.core.try_update_article(" id ")")))
+(def current-username (atom nil))
+(def notes-count (atom 0))
+(def goog-history (History.))
+(set! current-username nil)
 
-(em/defsnippet blog-post-view "/html/base.html" "#view-article" [{:keys [title body]}]
-  "#view-title" (ef/content title)
-  "#view-body" (ef/content body))
+(em/defsnippet note-edit-form "/html/base.html" "#note-form" [id content]
+  "#note-content" (ef/content content)
+  "#save-btn" (ef/set-attr :onclick (str "client.core.try_update_note(" id ")"))
+  "#cancel-btn" (ef/set-attr :onclick (str "client.core.show_note_by_id(" id ")")))
 
-(em/defsnippet blog-post "/html/base.html"
-  ".blog-post"  [{:keys [id title body]}]
-  "#blog-post-title" (ef/content title)
-  "#blog-post-body" (ef/content body)
-  "#article-view" (ef/set-attr :onclick
-                    (str "client.core.try_view_article(" id ")"))
-  "#article-edit" (ef/set-attr :onclick
-                    (str "client.core.try_edit_article(" id ")"))
-  "#article-delete" (ef/set-attr :onclick
-  (str "if(confirm('Really delete?')) client.core.try_delete_article(" id ")")))
+(em/defsnippet note-post "/html/base.html" "#note-post"  [{:keys [id username date content]}]
+  "#note-post" (ef/add-class (str "note-post-" id))
+  "#content" (ef/content content)
+  "#date" (ef/content (.toLocaleString date))
+  "#username" (ef/content username)
+  "#controls" (if (= current-username username)
+                (ef/remove-class "hidden")
+                (ef/add-class "hidden"))
+  "#note-edit" (ef/set-attr :onclick
+                 (str "client.core.show_edit_note_form(" id ")"))
+  "#note-delete" (ef/set-attr :onclick
+                   (str "if(confirm('Really delete?')) client.core.try_delete_note(" id ")"))
+  "#username-link" (ef/set-attr :href (str "/#/" username)))
 
+(defn get-current-location-user []
+  (.substring (.getToken goog-history) 1))
 
 (defn ^:export show-reg-form []
   (ef/at "#sidebar" (ef/content (reg-form))))
 
 (defn ^:export show-login-form []
-  (ef/at "#sidebar" (ef/content (login-form))))
+  (ef/at "#sidebar" (ef/content (login-form)))
+  (ef/at "#note-form-container" (ef/content "")))
 
 (defn userinfo-success [data]
-  (ef/at "#sidebar"
-    (ef/content (userinfo-form (:username data)))))
+  (let [username (:username data)]
+    (set! current-username username)
+    (ef/at "#sidebar"
+      (ef/content (userinfo-form username))))
+    (ef/at "#note-form-container" (ef/content (note-add-button))))
 
 (defn userinfo-failed [status status-text]
+  (set! current-username "anonymous")
   (show-login-form))
 
 (defn try-load-userinfo []
@@ -56,34 +69,59 @@
        {:handler userinfo-success
         :error-handler userinfo-failed}))
 
-(defn start []
-  (ef/at ".container"
-         (ef/do-> (ef/content (blog-header))
-                  (ef/append (blog-content))
-                  (ef/append (blog-sidebar))))
-  (try-load-userinfo))
-
 (defn hide-new-post-btn []
-  (ef/at "#new-post" (ef/set-attr :style "display:none;")))
+  (ef/at "#new-post" (ef/add-class "hidden")))
 
-(defn ^:export show-create []
-  (ef/at "#inner-content" (ef/content (blog-create-post)))
+(defn ^:export show-create-note-form []
+  (ef/at "#note-form-container" (ef/content (note-create-form)))
   (hide-new-post-btn))
 
+(defn note-loaded [data]
+  (let [selector (str ".note-post-" (:id data))]
+    (ef/at selector (ef/content (note-post data)))))
+
+(defn note-loaded-new [data]
+  (let [username (:username data)
+        location-user (get-current-location-user)]
+    (when (or (= location-user username)
+              (empty? location-user))
+      (set! notes-count (inc notes-count))
+      (ef/at "#inner-content" (ef/prepend (note-post data))))))
+
+(defn ^:export show-note-by-id [id]
+  (GET (str "/note/" id)
+       {:handler note-loaded}))
+
+(defn ^:export add-note-by-id [id]
+  (GET (str "/note/" id)
+       {:handler note-loaded-new}))
+
+(defn ^:export remove-note-by-id [id]
+  (ef/at (str ".note-post-" id)
+         (ef/remove-node)))
+
+
+(defn ^:export show-edit-note-form [id]
+  (let [selector (str ".note-post-" id)
+        content (ef/from (str selector " " "#content") (ef/get-text))]
+    (ef/at selector (ef/content (note-edit-form id content)))))
+
 (defn ^:export close-form []
-  (start))
+  (ef/at "#note-form-container" (ef/content (note-add-button))))
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "Something bad happened: " status " " status-text)))
 
-(defn article-saved [response]
+(defn note-saved [response]
   (close-form))
 
 (defn user-login-success []
-  (try-load-userinfo))
+  (try-load-userinfo)
+  (secretary/dispatch! "/"))
 
 (defn user-logout-success []
-  (start))
+  (try-load-userinfo)
+  (secretary/dispatch! "/"))
 
 (defn user-login-failed []
   (js/alert "Not authenticated: invalid login or password."))
@@ -121,56 +159,89 @@
             :handler user-reg-success
             :error-handler user-reg-failed}))))
 
-(defn ^:export try-update-article [id]
-  (POST (str "/article/update/" id)
-        {:params {:title (ef/from "#article-title" (ef/read-form-input))
-                  :body  (ef/from "#article-body" (ef/read-form-input))}
-         :handler article-saved
+(defn ^:export try-update-note [id]
+  (POST (str "/note/update/" id)
+        {:params {:content  (ef/from "#note-content" (ef/read-form-input))}
+         :handler note-saved
          :error-handler error-handler}))
 
-(defn ^:export article-edit [data]
-  (ef/at "#inner-content" (ef/content (blog-edit-post data)))
-  (hide-new-post-btn))
+(defn ^:export try-delete-note [id]
+  (POST (str "/note/delete/" id)
+        {:error-handler error-handler}))
 
-(defn ^:export try-edit-article [id]
-  (GET (str "/article/" id)
-        {:handler article-edit
-         :error-handler error-handler}))
+(defn ^:export try-create-note []
+  (let [content (.trim (ef/from "#note-content" (ef/read-form-input)))
+        len (.-length content)]
+  (if (zero? len)
+    (js/alert "Please, write content!")
+    (POST "/note/create"
+          {:params {:content content}
+           :handler note-saved
+           :error-handler error-handler}))))
 
-(defn article-view [data]
-  (hide-new-post-btn)
-  (ef/at "#inner-content" (ef/content (blog-post-view data))))
+(defn note-list [data]
+  (set! notes-count (count data))
+  (ef/at "#inner-content" (ef/content (map note-post data))))
 
-(defn ^:export try-view-article [id]
-  (GET (str "/article/" id)
-        {:handler article-view
-         :error-handler error-handler}))
+(defn try-load-notes [path]
+  (if current-username
+    (GET (str path)
+          {:handler note-list
+           :error-handler error-handler})
+    (js/setTimeout #(try-load-notes path) 10)))
 
-(defn ^:export try-delete-article [id]
-  (POST (str "/article/delete/" id)
-        {:handler article-saved
-         :error-handler error-handler}))
+(defn more-note-list [data]
+  (set! notes-count (+ notes-count (count data)))
+  (ef/at "#inner-content" (ef/append (map note-post data))))
 
-(defn ^:export try-create-article []
-  (.log js/console (ef/from "#article-title" (ef/read-form-input)))
-  (.log js/console (ef/from "#article-body" (ef/read-form-input)))
-  (POST "/article/create"
-        {:params {:title (ef/from "#article-title" (ef/read-form-input))
-                  :body (ef/from "#article-body" (ef/read-form-input))}
-         :handler article-saved
-         :error-handler error-handler}))
+(defn try-load-more-notes [path]
+    (GET (str path)
+          {:params {:offset notes-count}
+           :handler more-note-list
+           :error-handler error-handler}))
 
-(defroute "/" [] nil)
-  ;(ef/at "#login-form" (ef/content "FUCK root route")))
+(defn ^:export load-more-notes []
+  (let [location-user (get-current-location-user)]
+    (if (empty? location-user)
+      (try-load-more-notes "/note/list-all")
+      (try-load-more-notes (str "/note/list-user/" location-user)))))
 
-(defroute "/:user" []
-  (ef/at "#login-form" (ef/content "FUCK ROUTE")))
+(defn try-load-notes-for-user [user]
+  (try-load-notes (str "/note/list-user/" user)))
 
+(defn try-load-notes-all []
+  (try-load-notes "/note/list-all"))
 
-(def goog-history (History.))
+(defroute "/" [] nil
+  (try-load-notes-all))
 
-(set! (.-onload js/window) #(em/wait-for-load (start)
-                                              (secretary/dispatch! (.getToken goog-history))))
+(defroute "/:user" [user]
+  (try-load-notes-for-user user))
+
+(defn ws-message-received [{:keys [mtype id]}]
+  (case mtype
+    "update" (show-note-by-id id)
+    "create" (add-note-by-id id)
+    "delete" (remove-note-by-id id)))
+
+(defn ws-data-received [raw-data]
+  (let [[command channel data] (reader/read-string raw-data)]
+    (when (= command "message")
+      (ws-message-received (reader/read-string data)))))
+
+(defn init-websocket [url]
+  (let [ws (js/WebSocket. url)]
+    (set! (.-onmessage ws) #(ws-data-received (.-data %)))))
+
+(defn start []
+  (ef/at ".container"
+         (ef/do-> (ef/content (mnitter-header))
+                  (ef/append (mnitter-content))
+                  (ef/append (mnitter-sidebar))))
+  (try-load-userinfo)
+  (init-websocket (str "ws://" (.-host js/location) "/rpc")))
+
+(set! (.-onload js/window) #(em/wait-for-load (start)))
 
 (doto goog-history
   (goog.events/listen EventType/NAVIGATE
