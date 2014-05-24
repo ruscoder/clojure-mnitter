@@ -142,6 +142,10 @@
     (when (= command "message")
       (ws-message-received (reader/read-string data)))))
 
+
 (defn init-websocket [url]
-  (let [ws (js/WebSocket. url)]
-    (set! (.-onmessage ws) #(ws-data-received (.-data %)))))
+  (let [ws (js/WebSocket. url)
+        closed-connection (fn [] (js/console.log "closed. reconnecting")
+                                 (js/setTimeout #(init-websocket url) 3000))]
+    (set! (.-onmessage ws) #(ws-data-received (.-data %)))
+    (set! (.-onclose ws) closed-connection)))

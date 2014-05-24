@@ -39817,96 +39817,96 @@ goog.require("cljs.reader");
 goog.require("ajax.core");
 goog.require("enfocus.core");
 goog.require("enfocus.core");
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5558_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
 client.note.note_create_form = function note_create_form() {
-  var vec__5815 = function() {
+  var vec__5712 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form");
   }.call(null);
-  var id_sym5812 = cljs.core.nth.call(null, vec__5815, 0, null);
-  var pnod5813 = cljs.core.nth.call(null, vec__5815, 1, null);
-  var pnod5813__$1 = enfocus.core.create_hidden_dom.call(null, pnod5813);
-  enfocus.core.i_at.call(null, id_sym5812, pnod5813__$1);
-  enfocus.core.reset_ids.call(null, id_sym5812, pnod5813__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod5813__$1);
+  var id_sym5709 = cljs.core.nth.call(null, vec__5712, 0, null);
+  var pnod5710 = cljs.core.nth.call(null, vec__5712, 1, null);
+  var pnod5710__$1 = enfocus.core.create_hidden_dom.call(null, pnod5710);
+  enfocus.core.i_at.call(null, id_sym5709, pnod5710__$1);
+  enfocus.core.reset_ids.call(null, id_sym5709, pnod5710__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5710__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5558_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
 client.note.note_form_container = function note_form_container() {
-  var vec__5819 = function() {
+  var vec__5716 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form-container");
   }.call(null);
-  var id_sym5816 = cljs.core.nth.call(null, vec__5819, 0, null);
-  var pnod5817 = cljs.core.nth.call(null, vec__5819, 1, null);
-  var pnod5817__$1 = enfocus.core.create_hidden_dom.call(null, pnod5817);
-  enfocus.core.i_at.call(null, id_sym5816, pnod5817__$1);
-  enfocus.core.reset_ids.call(null, id_sym5816, pnod5817__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod5817__$1);
+  var id_sym5713 = cljs.core.nth.call(null, vec__5716, 0, null);
+  var pnod5714 = cljs.core.nth.call(null, vec__5716, 1, null);
+  var pnod5714__$1 = enfocus.core.create_hidden_dom.call(null, pnod5714);
+  enfocus.core.i_at.call(null, id_sym5713, pnod5714__$1);
+  enfocus.core.reset_ids.call(null, id_sym5713, pnod5714__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5714__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5558_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
 client.note.note_add_button = function note_add_button() {
-  var vec__5823 = function() {
+  var vec__5720 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-add-button");
   }.call(null);
-  var id_sym5820 = cljs.core.nth.call(null, vec__5823, 0, null);
-  var pnod5821 = cljs.core.nth.call(null, vec__5823, 1, null);
-  var pnod5821__$1 = enfocus.core.create_hidden_dom.call(null, pnod5821);
-  enfocus.core.i_at.call(null, id_sym5820, pnod5821__$1);
-  enfocus.core.reset_ids.call(null, id_sym5820, pnod5821__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod5821__$1);
+  var id_sym5717 = cljs.core.nth.call(null, vec__5720, 0, null);
+  var pnod5718 = cljs.core.nth.call(null, vec__5720, 1, null);
+  var pnod5718__$1 = enfocus.core.create_hidden_dom.call(null, pnod5718);
+  enfocus.core.i_at.call(null, id_sym5717, pnod5718__$1);
+  enfocus.core.reset_ids.call(null, id_sym5717, pnod5718__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5718__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5558_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
 client.note.note_edit_form = function note_edit_form(id, content) {
-  var vec__5827 = function() {
+  var vec__5724 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-form");
   }.call(null);
-  var id_sym5824 = cljs.core.nth.call(null, vec__5827, 0, null);
-  var pnod5825 = cljs.core.nth.call(null, vec__5827, 1, null);
-  var pnod5825__$1 = enfocus.core.create_hidden_dom.call(null, pnod5825);
-  enfocus.core.i_at.call(null, id_sym5824, pnod5825__$1, "#note-content", enfocus.core.content.call(null, content), "#save-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.try_update_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#cancel-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.show_note_by_id("), cljs.core.str(id), 
+  var id_sym5721 = cljs.core.nth.call(null, vec__5724, 0, null);
+  var pnod5722 = cljs.core.nth.call(null, vec__5724, 1, null);
+  var pnod5722__$1 = enfocus.core.create_hidden_dom.call(null, pnod5722);
+  enfocus.core.i_at.call(null, id_sym5721, pnod5722__$1, "#note-content", enfocus.core.content.call(null, content), "#save-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.try_update_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#cancel-btn", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.show_note_by_id("), cljs.core.str(id), 
   cljs.core.str(")")].join("")));
-  enfocus.core.reset_ids.call(null, id_sym5824, pnod5825__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod5825__$1);
+  enfocus.core.reset_ids.call(null, id_sym5721, pnod5722__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5722__$1);
 };
-enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5577_");
+enfocus.core.load_remote_dom.call(null, "/html/base.html", "remote/html/base.html", "en5558_");
 if (cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remote/html/base.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remote/html/base.html", new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMPTY_NODE, ["", "NOT_LOADED"], null));
 } else {
 }
-client.note.note_post = function note_post(p__5830) {
-  var map__5833 = p__5830;
-  var map__5833__$1 = cljs.core.seq_QMARK_.call(null, map__5833) ? cljs.core.apply.call(null, cljs.core.hash_map, map__5833) : map__5833;
-  var content = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "content", "content", 1965434859));
-  var date = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "date", "date", 1016980256));
-  var username = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "username", "username", 748190792));
-  var id = cljs.core.get.call(null, map__5833__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  var vec__5834 = function(map__5833, map__5833__$1, content, date, username, id) {
+client.note.note_post = function note_post(p__5727) {
+  var map__5730 = p__5727;
+  var map__5730__$1 = cljs.core.seq_QMARK_.call(null, map__5730) ? cljs.core.apply.call(null, cljs.core.hash_map, map__5730) : map__5730;
+  var content = cljs.core.get.call(null, map__5730__$1, new cljs.core.Keyword(null, "content", "content", 1965434859));
+  var date = cljs.core.get.call(null, map__5730__$1, new cljs.core.Keyword(null, "date", "date", 1016980256));
+  var username = cljs.core.get.call(null, map__5730__$1, new cljs.core.Keyword(null, "username", "username", 748190792));
+  var id = cljs.core.get.call(null, map__5730__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  var vec__5731 = function(map__5730, map__5730__$1, content, date, username, id) {
     return function() {
       return enfocus.core.get_cached_snippet.call(null, "remote/html/base.html", "#note-post");
     };
-  }(map__5833, map__5833__$1, content, date, username, id).call(null);
-  var id_sym5828 = cljs.core.nth.call(null, vec__5834, 0, null);
-  var pnod5829 = cljs.core.nth.call(null, vec__5834, 1, null);
-  var pnod5829__$1 = enfocus.core.create_hidden_dom.call(null, pnod5829);
-  enfocus.core.i_at.call(null, id_sym5828, pnod5829__$1, "#note-post", enfocus.core.add_class.call(null, [cljs.core.str("note-post-"), cljs.core.str(id)].join("")), "#content", enfocus.core.content.call(null, content), "#date", enfocus.core.content.call(null, date.toLocaleString()), "#username", enfocus.core.content.call(null, username), "#controls", cljs.core._EQ_.call(null, client.common.current_username, username) ? enfocus.core.remove_class.call(null, "hidden") : enfocus.core.add_class.call(null, 
+  }(map__5730, map__5730__$1, content, date, username, id).call(null);
+  var id_sym5725 = cljs.core.nth.call(null, vec__5731, 0, null);
+  var pnod5726 = cljs.core.nth.call(null, vec__5731, 1, null);
+  var pnod5726__$1 = enfocus.core.create_hidden_dom.call(null, pnod5726);
+  enfocus.core.i_at.call(null, id_sym5725, pnod5726__$1, "#note-post", enfocus.core.add_class.call(null, [cljs.core.str("note-post-"), cljs.core.str(id)].join("")), "#content", enfocus.core.content.call(null, content), "#date", enfocus.core.content.call(null, date.toLocaleString()), "#username", enfocus.core.content.call(null, username), "#controls", cljs.core._EQ_.call(null, client.common.current_username, username) ? enfocus.core.remove_class.call(null, "hidden") : enfocus.core.add_class.call(null, 
   "hidden"), "#note-edit", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("client.note.show_edit_note_form("), cljs.core.str(id), cljs.core.str(")")].join("")), "#note-delete", enfocus.core.set_attr.call(null, new cljs.core.Keyword(null, "onclick", "onclick", 3986521723), [cljs.core.str("if(confirm('Really delete?')) client.note.try_delete_note("), cljs.core.str(id), cljs.core.str(")")].join("")), "#username-link", enfocus.core.set_attr.call(null, 
   new cljs.core.Keyword(null, "href", "href", 1017115293), [cljs.core.str("/#/"), cljs.core.str(username)].join("")));
-  enfocus.core.reset_ids.call(null, id_sym5828, pnod5829__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod5829__$1);
+  enfocus.core.reset_ids.call(null, id_sym5725, pnod5726__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod5726__$1);
 };
 client.note.notes_count = cljs.core.atom.call(null, 0);
 client.note.hide_new_note_btn = function hide_new_note_btn() {
@@ -40011,19 +40011,19 @@ client.note.try_load_notes_for_user = function try_load_notes_for_user(user) {
 client.note.try_load_notes_all = function try_load_notes_all() {
   return client.note.try_load_notes.call(null, "/note/list-all");
 };
-client.note.ws_message_received = function ws_message_received(p__5835) {
-  var map__5838 = p__5835;
-  var map__5838__$1 = cljs.core.seq_QMARK_.call(null, map__5838) ? cljs.core.apply.call(null, cljs.core.hash_map, map__5838) : map__5838;
-  var id = cljs.core.get.call(null, map__5838__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
-  var mtype = cljs.core.get.call(null, map__5838__$1, new cljs.core.Keyword(null, "mtype", "mtype", 1118143641));
-  var G__5839 = mtype;
-  if (cljs.core._EQ_.call(null, "delete", G__5839)) {
+client.note.ws_message_received = function ws_message_received(p__5732) {
+  var map__5735 = p__5732;
+  var map__5735__$1 = cljs.core.seq_QMARK_.call(null, map__5735) ? cljs.core.apply.call(null, cljs.core.hash_map, map__5735) : map__5735;
+  var id = cljs.core.get.call(null, map__5735__$1, new cljs.core.Keyword(null, "id", "id", 1013907597));
+  var mtype = cljs.core.get.call(null, map__5735__$1, new cljs.core.Keyword(null, "mtype", "mtype", 1118143641));
+  var G__5736 = mtype;
+  if (cljs.core._EQ_.call(null, "delete", G__5736)) {
     return client.note.remove_note_by_id.call(null, id);
   } else {
-    if (cljs.core._EQ_.call(null, "create", G__5839)) {
+    if (cljs.core._EQ_.call(null, "create", G__5736)) {
       return client.note.add_note_by_id.call(null, id);
     } else {
-      if (cljs.core._EQ_.call(null, "update", G__5839)) {
+      if (cljs.core._EQ_.call(null, "update", G__5736)) {
         return client.note.show_note_by_id.call(null, id);
       } else {
         if (new cljs.core.Keyword(null, "else", "else", 1017020587)) {
@@ -40036,10 +40036,10 @@ client.note.ws_message_received = function ws_message_received(p__5835) {
   }
 };
 client.note.ws_data_received = function ws_data_received(raw_data) {
-  var vec__5841 = cljs.reader.read_string.call(null, raw_data);
-  var command = cljs.core.nth.call(null, vec__5841, 0, null);
-  var channel = cljs.core.nth.call(null, vec__5841, 1, null);
-  var data = cljs.core.nth.call(null, vec__5841, 2, null);
+  var vec__5738 = cljs.reader.read_string.call(null, raw_data);
+  var command = cljs.core.nth.call(null, vec__5738, 0, null);
+  var channel = cljs.core.nth.call(null, vec__5738, 1, null);
+  var data = cljs.core.nth.call(null, vec__5738, 2, null);
   if (cljs.core._EQ_.call(null, command, "message")) {
     return client.note.ws_message_received.call(null, cljs.reader.read_string.call(null, data));
   } else {
@@ -40048,11 +40048,22 @@ client.note.ws_data_received = function ws_data_received(raw_data) {
 };
 client.note.init_websocket = function init_websocket(url) {
   var ws = new WebSocket(url);
-  return ws.onmessage = function(ws) {
-    return function(p1__5842_SHARP_) {
-      return client.note.ws_data_received.call(null, p1__5842_SHARP_.data);
+  var closed_connection = function(ws) {
+    return function() {
+      console.log("closed. reconnecting");
+      return setTimeout(function(ws) {
+        return function() {
+          return init_websocket.call(null, url);
+        };
+      }(ws), 3E3);
     };
   }(ws);
+  ws.onmessage = function(ws, closed_connection) {
+    return function(p1__5739_SHARP_) {
+      return client.note.ws_data_received.call(null, p1__5739_SHARP_.data);
+    };
+  }(ws, closed_connection);
+  return ws.onclose = closed_connection;
 };
 goog.provide("clojure.walk");
 goog.require("cljs.core");
