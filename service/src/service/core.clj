@@ -10,7 +10,8 @@
         carica.core
         [service.notifier :only [api-handler]]
         [service.user :only [user-routes]]
-        [service.note :only [note-routes]]))
+        [service.note :only [note-routes]])
+  (:gen-class))
 
 (defroutes compojure-handler
   (GET "/" [] (slurp (io/resource "public/html/index.html")))

@@ -1,1 +1,1 @@
-web: lein with-profile production trampoline run $PORT
+web: java $JVM_OPTS -jar target/mnitter-standalone.jar $PORT
